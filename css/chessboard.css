@@ -1,0 +1,54 @@
+#chessboard{
+    border-collapse: collapse;
+    border-radius: 4px;
+}
+#chessboard *{
+    box-sizing: border-box;
+}
+
+#chessboard td{
+    width: 4em;
+    height: 4em;
+    border: 2px solid black;
+}
+
+#chessboard th{
+    width: 2em;
+    height: 1em;
+}
+#chessboard thead > tr > th:nth-of-type(n+2){
+    border: 1px solid black;
+}
+
+#chessboard tr:nth-of-type(2n) > td:nth-of-type(2n+3){
+    background-color: black;
+    
+}
+#chessboard tr:nth-of-type(2n+1) > td:nth-of-type(2n+2){
+    background-color: black;padding:0%;
+    white-space: nowrap;
+}
+
+#chessboard thead > tr > th:first-of-type{
+    width: 1em ;
+    text-align: center;
+}
+
+#chessboard tr > td:first-of-type{
+    width: 1em ;
+    text-align: center;
+    border: 1px solid black;
+}
+#chessboard img{
+    width: 90%;
+    height: 90%;
+    cursor: pointer;
+}
+#chessboard .evidenziata{
+    background-color: lime !important;
+    cursor: pointer;
+}
+#chessboard .avversario{
+    background-color: red !important;
+    cursor: pointer;
+}
