@@ -63,7 +63,6 @@ class Chessboard{
         for(let lettera of lettere){
             this.posizionaPezzo("pedone",lettera,2,BIANCO);
             this.posizionaPezzo("pedone",lettera,7,NERO);
-
         }
 
         //posizionamento torri
@@ -97,10 +96,13 @@ class Chessboard{
     static rimuoviEvidenziate(){
         const evidenziate=document.getElementsByClassName("evidenziata");
         while(0<evidenziate.length){
+            evidenziate[0].onclick=null;
             evidenziate[0].classList.remove("evidenziata");
         }
         const avversari=document.getElementsByClassName("avversario");
         while(0<avversari.length){
+            avversari[0].onclick=null;
+            avversari[0].firstChild.onclick=Chessboard.clickPezzo;
             avversari[0].classList.remove("avversario");
         }
     }
@@ -112,16 +114,50 @@ class Chessboard{
             return BIANCO;
     }
 
-    static evidenzia(lettera, numero,squadra){
+    static sposta(e){
+        const casella=e.target;
+        let [pezzo,squadra,lettera,numero]= Chessboard.scelto.id.split(",");
+        Chessboard.scelto.parentElement.classList.remove(squadra);
+        Chessboard.scelto.parentElement.removeChild(Chessboard.scelto);
+        casella.appendChild(Chessboard.scelto);
+        casella.classList.add(squadra);
+        Chessboard.scelto.id=pezzo+","+squadra+","+casella.id.charAt(0)+","+casella.id.charAt(1);
+        Chessboard.rimuoviEvidenziate();
+    }
+    
+    static mangia(e){
+        const pezzoAvversario=e.target;
+        const evento={};
+        evento.target=pezzoAvversario.parentElement;
+        let [,squadra,,]=pezzoAvversario.id.split(",");
+        pezzoAvversario.parentElement.classList.remove(squadra);
+        pezzoAvversario.parentElement.removeChild(pezzoAvversario);
+        Chessboard.sposta(evento);
+    }
+
+
+    static evidenzia(lettera, numero,squadra,nonMangiare=false,nonSpostarti=false){
         try {
             const casella=document.getElementById(lettera+String(numero))
+            //se c'è un pezzo aversario lo segnala per mangiarlo, a meno che sia un pedone
             if(casella.classList.contains(Chessboard.opposto(squadra))){
-                casella.classList.add("avversario");
+                if(!nonMangiare){
+                    casella.classList.add("avversario");
+                    casella.firstChild.onclick=Chessboard.mangia;
+                }
                 return false;
-            }else{
-                casella.classList.add("evidenziata");
-                return true;
             }
+            //non evidenzia sse c'è un pezzo della nostra squadra
+            if(casella.classList.contains(squadra)){
+                return false;
+            }
+            //se è un pedone non si sposta
+            if(nonSpostarti)
+                return false; 
+            //Evidenzia il posto come possibile per il movimento
+            casella.classList.add("evidenziata");
+            casella.onclick=Chessboard.sposta;
+            return true;
         } catch (error) {
             //Se esce dalla scacchiera avverte ritornando false
             return false;
@@ -156,17 +192,22 @@ class Chessboard{
     }
 
     static evidenziaPedone(lettera,numero,squadra){
+        let modificaLetteraP=lettera.charCodeAt(0)
         if(squadra==BIANCO&&numero<MAX_NUM){
             if(numero===2){
-                Chessboard.evidenzia(lettera,numero+2,squadra);
+                Chessboard.evidenzia(lettera,numero+2,squadra,true,false);
             }
-            Chessboard.evidenzia(lettera,numero+1,squadra);
+            Chessboard.evidenzia(lettera,numero+1,squadra,true,false);
+            Chessboard.evidenzia(String.fromCharCode(modificaLetteraP+1),numero+1,squadra,false,true);
+            Chessboard.evidenzia(String.fromCharCode(modificaLetteraP-1),numero+1,squadra,false,true);
         }
         if(squadra==NERO&&numero>2){
             if(numero===7){
-                Chessboard.evidenzia(lettera,numero-2,squadra);
+                Chessboard.evidenzia(lettera,numero-2,squadra,true,false);
             }
-            Chessboard.evidenzia(lettera,numero-1,squadra);
+            Chessboard.evidenzia(lettera,numero-1,squadra,true,false);
+            Chessboard.evidenzia(String.fromCharCode(modificaLetteraP+1),numero-1,squadra,false,true);
+            Chessboard.evidenzia(String.fromCharCode(modificaLetteraP-1),numero-1,squadra,false,true);
         }
     }
 
@@ -200,7 +241,7 @@ class Chessboard{
         
         //Rimuove le possibili mosse del pezzo premuto in precedenza
         Chessboard.rimuoviEvidenziate();
-        Chessboard.scelto=pezzo;
+        Chessboard.scelto=target;
         
         switch (pezzo) {
             case "pedone":
