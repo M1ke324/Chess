@@ -10,7 +10,6 @@
         }
 
         function fine($response){
-            error_log(json_encode($response));
             echo json_encode($response);
             exit();
         }
@@ -60,7 +59,7 @@
 
                         $response['success'] = true;
                         $response['message'] = 'Login effettuato con successo';
-                        $response['redirect'] = 'chessboard.php';
+                        $response['redirect'] = 'mainBoard.php';
                     }else{
                         $response['message'] = 'Password non valida';
                     } 
@@ -76,6 +75,7 @@
 <html lang="it">
 <head>
     <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="css/button.css">
     <meta charset="UTF-8">
     <script src="js/login.js"></script>
     <title>Login</title>

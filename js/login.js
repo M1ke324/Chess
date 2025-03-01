@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
     password=document.getElementById("password")
     button=document.getElementById("login");
     form=document.getElementById("form");
-    errori=document.getElementById("errori")
+    errori=document.getElementById("errori");
     
     form.addEventListener("submit", submit)
 })
@@ -33,7 +33,6 @@ function submit(e){
         })
         .then(response => response.json())
         .then(data => {
-            console.log(data)
             if (data.success) {
                 window.location.href = data.redirect;
             } else {

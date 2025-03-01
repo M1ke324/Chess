@@ -16,18 +16,6 @@ input{
     border-radius: 1em;
     border: 2px solid #6F1A07;
 }
-button{
-    font-family: "Comfortaa", sans-serif !important;
-    height: 2em;
-    border-radius: 1em;
-    border-style: none;
-    color: white;
-    width: 100%;
-    font-weight: bold;
-    font-size: 1em;
-    background-color: #6F1A07;
-    font-family: "Roboto", serif;
-}
 
 input:invalid{
     color: red;

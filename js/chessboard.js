@@ -1,13 +1,21 @@
 let table;
 const BIANCO="B";
 const NERO="N";
+let reverse=false;
 const MAX_NUM=8;
+let move=true;
 
 const lettere=['a','b','c','d','e','f','g','h'];
 document.addEventListener("DOMContentLoaded",()=>{
+    const colore=document.getElementById("colore");
+    if(colore){
+        if(colore.getAttribute("data-colore")=="N"){
+            reverse=true;
+            move=false;
+        }
+    }
     Chessboard.createChessboard();
     Chessboard.setUpChessboard();
-    
 });
 
 class Chessboard{
@@ -28,18 +36,23 @@ class Chessboard{
             th.textContent=String(lettera).toUpperCase();
         }
         table.appendChild(thead);
-        for(let numero=8;numero>=1;numero--){
+        let num=0;
+        for(let numero=MAX_NUM;numero>=1;numero--){
+            if(reverse)
+                num=MAX_NUM-numero+1;
+            else
+                num=numero
             const tr=document.createElement("tr");
             table.appendChild(tr);
             //Prima colonna con numero
-            tr.id=numero;
+            tr.id=num;
             const td=document.createElement("td");
-            td.textContent=String(numero);
+            td.textContent=String(num);
             tr.appendChild(td);
             //Scacchiera vera e propria
             for(let lettera of lettere){
                 const td=document.createElement("td");
-                td.id=lettera+String(numero);
+                td.id=lettera+String(num);
                 tr.appendChild(td);
             }
         }
@@ -143,7 +156,8 @@ class Chessboard{
             if(casella.classList.contains(Chessboard.opposto(squadra))){
                 if(!nonMangiare){
                     casella.classList.add("avversario");
-                    casella.firstChild.onclick=Chessboard.mangia;
+                    if(move)
+                        casella.firstChild.onclick=Chessboard.mangia;
                 }
                 return false;
             }
@@ -156,7 +170,8 @@ class Chessboard{
                 return false; 
             //Evidenzia il posto come possibile per il movimento
             casella.classList.add("evidenziata");
-            casella.onclick=Chessboard.sposta;
+            if(move)
+                casella.onclick=Chessboard.sposta;
             return true;
         } catch (error) {
             //Se esce dalla scacchiera avverte ritornando false
