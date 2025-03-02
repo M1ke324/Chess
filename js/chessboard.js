@@ -1,26 +1,42 @@
 let table;
 const BIANCO="B";
 const NERO="N";
-let reverse=false;
-const MAX_NUM=8;
-let move=true;
 
 const lettere=['a','b','c','d','e','f','g','h'];
 document.addEventListener("DOMContentLoaded",()=>{
     const colore=document.getElementById("colore");
     if(colore){
         if(colore.getAttribute("data-colore")=="N"){
-            reverse=true;
-            move=false;
-        }
+            Chessboard.imBlack();
+            Chessboard.doLoopRequest();
+        }else
+        Chessboard.imWhite();
     }
     Chessboard.createChessboard();
     Chessboard.setUpChessboard();
 });
 
 class Chessboard{
-    scelto;
+    static MAX_NUM=8;
+    static scelto;
+    static intervalCheckMove;
+    static myturn;
+    static white;
+    static move;
 
+    static imWhite(){
+        Chessboard.white=true;
+        Chessboard.move=true;
+    }
+
+    static imBlack(){
+        Chessboard.white=false;
+        Chessboard.move=false;
+    }
+
+    static moveOpponent(){
+        Chessboard.move=!Chessboard.move;
+    }
 
     static createChessboard(){
         table=document.getElementById("chessboard");
@@ -37,9 +53,10 @@ class Chessboard{
         }
         table.appendChild(thead);
         let num=0;
-        for(let numero=MAX_NUM;numero>=1;numero--){
-            if(reverse)
-                num=MAX_NUM-numero+1;
+        for(let numero=Chessboard.MAX_NUM;numero>=1;numero--){
+            //Se siamo neri la scacchiera viene creata sottosopra
+            if(!Chessboard.white)
+                num=Chessboard.MAX_NUM-numero+1;
             else
                 num=numero
             const tr=document.createElement("tr");
@@ -100,7 +117,7 @@ class Chessboard{
         this.posizionaPezzo("re","d",1,BIANCO);
         this.posizionaPezzo("re","d",8,NERO);
                 
-        //posizionamento re
+        //posizionamento regina
         this.posizionaPezzo("regina","e",1,BIANCO);
         this.posizionaPezzo("regina","e",8,NERO);
 
@@ -130,12 +147,16 @@ class Chessboard{
     static sposta(e){
         const casella=e.target;
         let [pezzo,squadra,lettera,numero]= Chessboard.scelto.id.split(",");
-        Chessboard.scelto.parentElement.classList.remove(squadra);
-        Chessboard.scelto.parentElement.removeChild(Chessboard.scelto);
-        casella.appendChild(Chessboard.scelto);
-        casella.classList.add(squadra);
-        Chessboard.scelto.id=pezzo+","+squadra+","+casella.id.charAt(0)+","+casella.id.charAt(1);
-        Chessboard.rimuoviEvidenziate();
+        if(!Chessboard.move||Chessboard.white&&squadra==BIANCO||!Chessboard.white&&squadra==NERO){
+            Chessboard.scelto.parentElement.classList.remove(squadra);
+            Chessboard.scelto.parentElement.removeChild(Chessboard.scelto);
+            casella.appendChild(Chessboard.scelto);
+            casella.classList.add(squadra);
+            Chessboard.scelto.id=pezzo+","+squadra+","+casella.id.charAt(0)+","+casella.id.charAt(1);
+            Chessboard.rimuoviEvidenziate();
+            if(Chessboard.move)
+                Chessboard.inviaMossa(lettera+numero,pezzo,casella.id);
+        }
     }
     
     static mangia(e){
@@ -143,12 +164,17 @@ class Chessboard{
         const evento={};
         evento.target=pezzoAvversario.parentElement;
         let [,squadra,,]=pezzoAvversario.id.split(",");
-        pezzoAvversario.parentElement.classList.remove(squadra);
-        pezzoAvversario.parentElement.removeChild(pezzoAvversario);
-        Chessboard.sposta(evento);
+        if(!Chessboard.move||!Chessboard.white&&squadra==BIANCO||Chessboard.white&&squadra==NERO){
+            pezzoAvversario.parentElement.classList.remove(squadra);
+            pezzoAvversario.parentElement.removeChild(pezzoAvversario);
+            Chessboard.sposta(evento);
+        }
     }
 
-
+    //Evidenzia una casella per indicarla come possibile per uno spostamento
+    //Opzioni utili Sopratuttto per il pedone:
+    //Non mangiare permette di specificare se si vuoe evitare di mangiare pezzi avversari nello spostamento
+    //Non spostart serve ad indicare caselle dove si può arrivare solo mangiando
     static evidenzia(lettera, numero,squadra,nonMangiare=false,nonSpostarti=false){
         try {
             const casella=document.getElementById(lettera+String(numero))
@@ -156,12 +182,12 @@ class Chessboard{
             if(casella.classList.contains(Chessboard.opposto(squadra))){
                 if(!nonMangiare){
                     casella.classList.add("avversario");
-                    if(move)
+                    if(Chessboard.move)
                         casella.firstChild.onclick=Chessboard.mangia;
                 }
                 return false;
             }
-            //non evidenzia sse c'è un pezzo della nostra squadra
+            //non evidenzia se c'è un pezzo della nostra squadra
             if(casella.classList.contains(squadra)){
                 return false;
             }
@@ -170,7 +196,7 @@ class Chessboard{
                 return false; 
             //Evidenzia il posto come possibile per il movimento
             casella.classList.add("evidenziata");
-            if(move)
+            if(Chessboard.move)
                 casella.onclick=Chessboard.sposta;
             return true;
         } catch (error) {
@@ -206,9 +232,12 @@ class Chessboard{
         while(Chessboard.evidenzia(String.fromCharCode(++modificaLetteraT),modificaNumeroT,squadra));
     }
 
+    //evidenzia le possibili mosse del pedone
     static evidenziaPedone(lettera,numero,squadra){
-        let modificaLetteraP=lettera.charCodeAt(0)
-        if(squadra==BIANCO&&numero<MAX_NUM){
+        let modificaLetteraP=lettera.charCodeAt(0);
+
+        if(squadra==BIANCO&&numero<Chessboard.MAX_NUM){
+            //Se è in posizione di partenza si può muovere di 2
             if(numero===2){
                 Chessboard.evidenzia(lettera,numero+2,squadra,true,false);
             }
@@ -216,6 +245,7 @@ class Chessboard{
             Chessboard.evidenzia(String.fromCharCode(modificaLetteraP+1),numero+1,squadra,false,true);
             Chessboard.evidenzia(String.fromCharCode(modificaLetteraP-1),numero+1,squadra,false,true);
         }
+        //uguale a sopra ma i pedoni neri si muovo in negativo rispetto ai numeri
         if(squadra==NERO&&numero>2){
             if(numero===7){
                 Chessboard.evidenzia(lettera,numero-2,squadra,true,false);
@@ -249,6 +279,7 @@ class Chessboard{
         Chessboard.evidenziaTorre(lettera,numero,squadra);
     }
 
+    //Chiamata al click di un pezzo
     static clickPezzo(e){
         const target=e.target;
         let [pezzo,squadra,lettera,numero]=target.id.split(",");
@@ -278,5 +309,74 @@ class Chessboard{
                     Chessboard.evidenziaRe(lettera,numero,squadra);
                 break;
         }
+    }
+
+    static inviaMossa(partenza,pezzo,arrivo){
+        let invio={};
+        invio.partenza=partenza;
+        invio.pezzo=pezzo;
+        invio.arrivo=arrivo;
+        
+        fetch('match.php', {
+            method: 'POST',
+            body: JSON.stringify(invio),
+            credentials: 'same-origin'
+        })
+        .then(response => response.text())
+        .then(data => {
+            console.log(data)
+            if(data==="done")
+                Chessboard.moveOpponent();
+                Chessboard.doLoopRequest();
+            })
+            .catch(error => {
+                console.error('Errore:', error);
+            });
+        }
+        
+    static doLoopRequest(){            
+        Chessboard.intervalCheckMove=setInterval(Chessboard.checkMove, 1000);
+    }
+
+    static movePiece(start,piece,end){
+        const startingSquare=document.getElementById(start);
+        const endingSquare=document.getElementById(end);
+        if(startingSquare.firstChild){
+            Chessboard.scelto=startingSquare.firstChild;
+            const evento={};
+            if(endingSquare.firstChild){
+                evento.target=endingSquare.firstChild;
+                Chessboard.mangia(evento);
+            }else{
+                evento.target=endingSquare;
+                Chessboard.sposta(evento);
+            }
+        }
+    }
+
+    static checkMove(){
+        let invio={};
+        invio.request=true;
+        invio.player=Chessboard.white;
+        
+        fetch('match.php', {
+            method: 'POST',
+            body: JSON.stringify(invio),
+            credentials: 'same-origin'
+        })
+        .then(response => response.text())
+        .then(data => {
+            console.log(data);
+            if(data!=="no"){
+                clearInterval(Chessboard.intervalCheckMove);
+                let moves=data.split(";");
+                let lastMove=moves[moves.length-2].split(",");
+                Chessboard.movePiece(lastMove[0],lastMove[1],lastMove[2]);
+                Chessboard.moveOpponent();
+            }
+        })
+        .catch(error => {
+            console.error('Errore:', error);
+        });
     }
 }
