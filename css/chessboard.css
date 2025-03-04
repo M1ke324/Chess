@@ -52,3 +52,11 @@
     background-color: red !important;
     cursor: pointer;
 }
+
+.pericolo{
+    background-color: violet !important;
+    
+}
+.scacco{
+    background-color: turquoise !important;
+}
