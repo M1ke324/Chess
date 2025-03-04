@@ -26,6 +26,8 @@ class Chessboard{
     static scacco;
     static scaccoMatto;
     static cercoScaccoMatto;
+    static provaDiScacco;
+    static scaccoFasullo;
 
     static imWhite(){
         Chessboard.white=true;
@@ -143,6 +145,10 @@ class Chessboard{
         Chessboard.rimuoviClasse("evidenziata",(casella)=>{casella.onclick=null;})
         Chessboard.rimuoviClasse("avversario",(casella)=>{casella.onclick=null;casella.firstChild.onclick=Chessboard.clickPezzo;})
         Chessboard.rimuoviClasse("pericolo");
+        if(Chessboard.scaccoFasullo){
+            Chessboard.scaccoFasullo=false;
+            Chessboard.rimuoviClasse("scacco");
+        }
     }
 
     static opposto(squadra){
@@ -213,6 +219,10 @@ class Chessboard{
              * in quel caso non mi ci posso spostare
             */
             if(!re&&Chessboard.scacco&&!casella.classList.contains("scacco")){
+                return false;
+            }
+
+            if(Chessboard.scaccoFasullo&&!casella.classList.contains("scacco")){
                 return false;
             }
             
@@ -331,6 +341,7 @@ class Chessboard{
         //Rimuove le possibili mosse del pezzo premuto in precedenza
         Chessboard.rimuoviEvidenziate();
         Chessboard.scelto=target;
+        Chessboard.controlloAutoScacco(pezzo,squadra,lettera,numero,e.target);
         Chessboard.selettoreDiMosse(pezzo,lettera,numero,squadra);
     }
     //Rende possibile eseguire su ogni casella in cui può muoversi un pezzo una funzione, default: evidenzia
@@ -490,9 +501,11 @@ class Chessboard{
             //console.log(squadra);
             if(casella.classList.contains(Chessboard.opposto(squadra))&&casella.firstChild){
                 let [pezzo,,,]=casella.firstChild.id.split(",")
-                console.log(pezzo);
                 if(pezzo==="re"){
-                    Chessboard.scaccoAvversario=true;
+                    if(Chessboard.provaDiScacco)
+                        Chessboard.scaccoFasullo=casella.firstChild.id;
+                    else
+                        Chessboard.scaccoAvversario=true;
                 }
                 return false;
             }
@@ -544,8 +557,8 @@ class Chessboard{
             return false;
         }
     }
-    
-    static generaPostiPericolosi(squadraPredefinita=false,scacco=false){
+    //fa fare ad ogni pezzo una determinata funzione, che se non specificata è la generazione dei punti pericolosi
+    static generaPostiPericolosi(squadraPredefinita=false,scacco=false,funzione=Chessboard.evidenziaPuntiMangiabili){
         let pezzi;
         if(squadraPredefinita===false)
             pezzi=document.querySelectorAll("#chessboard ."+Chessboard.opposto(Chessboard.miaSquadra()));
@@ -557,7 +570,7 @@ class Chessboard{
             Chessboard.cercoScaccoMatto=true;
         for(pezzo of pezzi){
             let [tipoPezzo,squadra,lettera,numero]=pezzo.firstChild.id.split(",");
-            Chessboard.selettoreDiMosse(tipoPezzo,lettera,numero,squadra,Chessboard.evidenziaPuntiMangiabili,true,true);
+            Chessboard.selettoreDiMosse(tipoPezzo,lettera,numero,squadra,funzione,true,true);
         }
         if(scacco)
             Chessboard.cercoScaccoMatto=false;
@@ -599,8 +612,7 @@ class Chessboard{
             if(casella.classList.contains(Chessboard.opposto(squadra))){
                 if(!casella.classList.contains("pericolo")){
                     Chessboard.scaccoMatto=false;
-                    //può anche smettere di cercare
-                    return false;
+                    console.log("il re può uscire dallo scacco");
                 }
                 return false;
             }
@@ -611,13 +623,28 @@ class Chessboard{
             //Controlla se la casella vuota è una casella in cui può essere mangiato
             if(!casella.classList.contains("pericolo")){
                 Chessboard.scaccoMatto=false;
-                    //può anche smettere di cercare
-                    return false;
+                console.log("il re può uscire dallo scacco");
             }
             return true;
         } catch (error) {
             //Se esce dalla scacchiera avverte ritornando false
             return false;
+        }
+    }
+    /*Questa funzione chaimata prima di evidenziare le mosse serve a controllare se postando il pezzo si farà un auto scacco
+        in quel caso blocca il movimento verra gestito come se fossimo sotto scacco permettendo solo i movimenti sotto scacco
+    */
+    static controlloAutoScacco(pezzo,squadra,lettera,numero,casella){
+        const padre=casella.parentElement;
+        padre.removeChild(casella);
+        Chessboard.provaDiScacco=true;
+        Chessboard.scaccoFasullo=false;
+        Chessboard.generaPostiPericolosi(false,false,Chessboard.ceUnoScacco);
+        Chessboard.provaDiScacco=false;
+        padre.appendChild(casella);
+        if(Chessboard.scaccoFasullo){
+            let [pezzoA,squadraA/*Avversaria*/,letteraA,numeroA]=casella.id.split(",");
+            Chessboard.preparazioneScacco(letteraA+numeroA,pezzoA,squadraA);
         }
     }
 }
