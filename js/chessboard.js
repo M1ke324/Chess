@@ -28,6 +28,7 @@ class Chessboard{
     static cercoScaccoMatto;
     static provaDiScacco;
     static scaccoFasullo;
+    static partitaFinita;
 
     static imWhite(){
         Chessboard.white=true;
@@ -142,8 +143,8 @@ class Chessboard{
     }
 
     static rimuoviEvidenziate(){
-        Chessboard.rimuoviClasse("evidenziata",(casella)=>{casella.onclick=null;})
-        Chessboard.rimuoviClasse("avversario",(casella)=>{casella.onclick=null;casella.firstChild.onclick=Chessboard.clickPezzo;})
+        Chessboard.rimuoviClasse("evidenziata",(casella)=>{if(casella){casella.onclick=null;}})
+        Chessboard.rimuoviClasse("avversario",(casella)=>{if(casella){casella.onclick=null;casella.firstChild.onclick=Chessboard.clickPezzo;}})
         Chessboard.rimuoviClasse("pericolo");
         if(Chessboard.scaccoFasullo){
             Chessboard.scaccoFasullo=false;
@@ -218,7 +219,7 @@ class Chessboard{
              * se la casella non è segnata come scacco
              * in quel caso non mi ci posso spostare
             */
-            if(!re&&Chessboard.scacco&&!casella.classList.contains("scacco")){
+            if(!re&&Chessboard.scacco&&squadra==Chessboard.miaSquadra()&&!casella.classList.contains("scacco")){
                 return false;
             }
 
@@ -341,7 +342,8 @@ class Chessboard{
         //Rimuove le possibili mosse del pezzo premuto in precedenza
         Chessboard.rimuoviEvidenziate();
         Chessboard.scelto=target;
-        Chessboard.controlloAutoScacco(pezzo,squadra,lettera,numero,e.target);
+        if(Chessboard.miaSquadra()==squadra&&Chessboard.move&&!Chessboard.scacco)
+            Chessboard.controlloAutoScacco(e.target);
         Chessboard.selettoreDiMosse(pezzo,lettera,numero,squadra);
     }
     //Rende possibile eseguire su ogni casella in cui può muoversi un pezzo una funzione, default: evidenzia
@@ -387,7 +389,8 @@ class Chessboard{
             console.log(data)
             if(data==="done")
                 Chessboard.moveOpponent();
-                Chessboard.doLoopRequest();
+                if(!Chessboard.partitaFinita)
+                    Chessboard.doLoopRequest();
             })
             .catch(error => {
                 console.error('Errore:', error);
@@ -395,7 +398,7 @@ class Chessboard{
         }
         
     static doLoopRequest(){            
-        Chessboard.intervalCheckMove=setInterval(Chessboard.checkMove, 1000);
+        Chessboard.intervalCheckMove=setInterval(Chessboard.checkMove, 1500);
     }
 
     static movePiece(start,piece,end){
@@ -465,7 +468,7 @@ class Chessboard{
     static preparazioneScacco(casella,pezzo,squadra){
         let squadraRe=Chessboard.opposto(squadra);
         document.getElementById(casella).classList.add("scacco");
-        if(pezzo=="pedone"||pezzo=="cavallo"){
+        if(pezzo=="pedone"&&!Chessboard.provaDiScacco||pezzo=="cavallo"){
             return;
         }
         let re=document.getElementsByClassName("re"+squadraRe);
@@ -475,11 +478,12 @@ class Chessboard{
         letteraScacco=letteraScacco.charCodeAt(0)
         while(true){
             letteraRe=letteraRe.charCodeAt(0);
-            if(letteraRe>letteraScacco)letteraRe=String.fromCharCode(--letteraRe);
-            if(letteraRe<letteraScacco)letteraRe=String.fromCharCode(++letteraRe);
+            if(letteraRe>letteraScacco)letteraRe=--letteraRe;
+            if(letteraRe<letteraScacco)letteraRe=++letteraRe;
             if(numeroRe>numeroScacco)--numeroRe;
             if(numeroRe<numeroScacco)++numeroRe;
             if(letteraRe===letteraScacco&&numeroRe==numeroScacco)break;
+            letteraRe=String.fromCharCode(letteraRe);
             document.getElementById(letteraRe+String(numeroRe)).classList.add("scacco")
         }
 
@@ -493,6 +497,7 @@ class Chessboard{
     }
 
     //Controlla se sulla casella c'è il re e nel caso setta Chessboard.scaccoAvversario
+    //oppure cerca un pezzo specifico e gli si può dare una classe specifica 
     static ceUnoScacco(lettera,numero,squadra){
         try{
             const casella=document.getElementById(lettera+String(numero))
@@ -500,10 +505,10 @@ class Chessboard{
             //console.log(casella);
             //console.log(squadra);
             if(casella.classList.contains(Chessboard.opposto(squadra))&&casella.firstChild){
-                let [pezzo,,,]=casella.firstChild.id.split(",")
+                let [pezzo,,letteraDaControllare,numeroDaControllare]=casella.firstChild.id.split(",")
                 if(pezzo==="re"){
                     if(Chessboard.provaDiScacco)
-                        Chessboard.scaccoFasullo=casella.firstChild.id;
+                        Chessboard.scaccoFasullo=true;
                     else
                         Chessboard.scaccoAvversario=true;
                 }
@@ -525,15 +530,11 @@ class Chessboard{
      * in modo da controllare se ha possibilita di muoversi il re. E se è attivo ScaccoMatto controlla se una zona pericolosa si sovrappone con una zona
      * di scacco in questo caso non è scacco matto, perchè il re può essere salvato spostando un'altro pezzo tra il re e lo scacco
     */
-    static evidenziaPuntiMangiabili(lettera,numero,squadra,){
+    static evidenziaPuntiMangiabili(lettera,numero,squadra/*,nonMangiare=false,nonSpostarti=false*/){
         try{
             const casella=document.getElementById(lettera+String(numero))
             //Sto selezionando le mosse dell'avversario, quindi se c'è un pezzo è mio non è pericolo e smette di cercare in quella direzione
             if(casella.classList.contains(Chessboard.opposto(squadra))){
-                return false;
-            }
-            //se c'è un pezzo della squadra avversaria, lo segna come pericolo per segnalarmi che non posso mangiarlo
-            if(casella.classList.contains(squadra)){
                 casella.classList.add("pericolo");
                 if(Chessboard.cercoScaccoMatto){
                     if(casella.classList.contains("scacco")){
@@ -543,6 +544,20 @@ class Chessboard{
                 }
                 return false;
             }
+            //se c'è un pezzo della squadra avversaria, lo segna come pericolo per segnalarmi che non posso mangiarlo
+            if(casella.classList.contains(squadra)){
+                casella.classList.add("pericolo");
+                /*if(Chessboard.cercoScaccoMatto){
+                    if(casella.classList.contains("scacco")){
+                        console.log("non è scacco matto, il re può mangiare un pezzo avversario")
+                        Chessboard.scaccoMatto=false;
+                    }
+                }*/
+                return false;
+            }
+            //Se sto cercando degli scacchi matti il pedone non può muoversi di lato senza che ci sia un un pezzo
+            //if(Chessboard.cercoScaccoMatto&&nonSpostarti)
+                //return false;
             //altrimenti  l'avvversario identifica la casella come mangiabile e continua a spostarsi in quella direzione
             casella.classList.add("pericolo");
             if(Chessboard.cercoScaccoMatto){
@@ -557,8 +572,9 @@ class Chessboard{
             return false;
         }
     }
-    //fa fare ad ogni pezzo una determinata funzione, che se non specificata è la generazione dei punti pericolosi
-    static generaPostiPericolosi(squadraPredefinita=false,scacco=false,funzione=Chessboard.evidenziaPuntiMangiabili){
+    //fa fare ad ogni pezzo una determinata funzione, che se non specificata è la generazione dei punti pericolosi della squadra data come argomento
+    //se non viene data è la squadra avversaria
+    static generaPostiPericolosi(squadraPredefinita=false,scacco=false,funzione=Chessboard.evidenziaPuntiMangiabili,saltaRe=false){
         let pezzi;
         if(squadraPredefinita===false)
             pezzi=document.querySelectorAll("#chessboard ."+Chessboard.opposto(Chessboard.miaSquadra()));
@@ -570,32 +586,49 @@ class Chessboard{
             Chessboard.cercoScaccoMatto=true;
         for(pezzo of pezzi){
             let [tipoPezzo,squadra,lettera,numero]=pezzo.firstChild.id.split(",");
+            //Ste sto cercando se un pezzo può andare sopra un punto di scacco per salvare il re
+            //tra questi pezzi non devo considerare il re
+            if(saltaRe&&tipoPezzo=="re")
+                continue;
             Chessboard.selettoreDiMosse(tipoPezzo,lettera,numero,squadra,funzione,true,true);
+            if(Chessboard.scaccoFasullo){
+                Chessboard.scaccoFasullo=document.getElementById(lettera+numero).firstChild;
+                break;
+            }
         }
         if(scacco)
             Chessboard.cercoScaccoMatto=false;
     }
     //Controlla se c'è uno scacco matto chiamata dopo il controllo di uno scacco che ha avuto successo, alla fine di ogni mossa
     static controlloScaccoMatto(pezzo,lettera,numero,squadra){
+
         let re=document.getElementsByClassName("re"+((Chessboard.white)?NERO:BIANCO));
         re=re[0];
         let [,squadraRe/*Avversaria*/,letteraRe,numeroRe]=re.id.split(",");
         Chessboard.scaccoMatto=true;
-        //genero i posti in cui c'è scacco
+        //genero i posti in cui c'è scacco per il re avversario
         Chessboard.preparazioneScacco(/*casella*/String(lettera)+String(numero),pezzo,Chessboard.miaSquadra());
-        //genero i posti pericolosi per il re avversario
+        //genero i posti pericolosi cell'avversario, cioè i posti dove lui può muovere o mangiare
         //controllo se un posto pericoloso si sovrapppone ad un posto scacco
-        //c'ò vorrebbe dire che qualcuno si può mettere a riparo del re in scacco
-        Chessboard.generaPostiPericolosi(Chessboard.miaSquadra(),true);
+        //c'ò vorrebbe dire che qualcuno può mettere a riparo del re in scacco
+        Chessboard.generaPostiPericolosi(false,true,Chessboard.evidenziaPuntiMangiabili,true);
+        Chessboard.rimuoviClasse("scacco");
+        Chessboard.rimuoviClasse("pericolo");
+
+
+        //Se nessuno dei suoi pezzi si può opporre al mio scacco
         if(!Chessboard.scaccoMatto){
-            //Controllo se ha dei posti in cui può muoversi
+            //genero i miei posti pericolosi
+            Chessboard.generaPostiPericolosi(Chessboard.miaSquadra());
+            //Controllo se ha dei posti in cui può muoversi che non siano pericolosi, in cui non ci siano pezzi suoi
             Chessboard.evidenziaRe(letteraRe,numeroRe,squadraRe,Chessboard.siPuoMuovere);
         }
-        Chessboard.rimuoviClasse("scacco");
         Chessboard.rimuoviClasse("pericolo");
         if(Chessboard.scaccoMatto){
             Chessboard.scaccoMatto;
             //FINE PARTITA
+            clearInterval(Chessboard.intervalCheckMove);
+            Chessboard.partitaFinita=true;
             console.log("fine partita");
         }
     }
@@ -612,7 +645,7 @@ class Chessboard{
             if(casella.classList.contains(Chessboard.opposto(squadra))){
                 if(!casella.classList.contains("pericolo")){
                     Chessboard.scaccoMatto=false;
-                    console.log("il re può uscire dallo scacco");
+                    console.log("il re può mangaire un pezzo avversario");
                 }
                 return false;
             }
@@ -623,7 +656,7 @@ class Chessboard{
             //Controlla se la casella vuota è una casella in cui può essere mangiato
             if(!casella.classList.contains("pericolo")){
                 Chessboard.scaccoMatto=false;
-                console.log("il re può uscire dallo scacco");
+                console.log("il re ha una casella vuota accanto");
             }
             return true;
         } catch (error) {
@@ -634,7 +667,7 @@ class Chessboard{
     /*Questa funzione chaimata prima di evidenziare le mosse serve a controllare se postando il pezzo si farà un auto scacco
         in quel caso blocca il movimento verra gestito come se fossimo sotto scacco permettendo solo i movimenti sotto scacco
     */
-    static controlloAutoScacco(pezzo,squadra,lettera,numero,casella){
+    static controlloAutoScacco(casella){
         const padre=casella.parentElement;
         padre.removeChild(casella);
         Chessboard.provaDiScacco=true;
@@ -643,7 +676,7 @@ class Chessboard{
         Chessboard.provaDiScacco=false;
         padre.appendChild(casella);
         if(Chessboard.scaccoFasullo){
-            let [pezzoA,squadraA/*Avversaria*/,letteraA,numeroA]=casella.id.split(",");
+            let [pezzoA,squadraA/*Avversaria*/,letteraA,numeroA]=Chessboard.scaccoFasullo.id.split(",");
             Chessboard.preparazioneScacco(letteraA+numeroA,pezzoA,squadraA);
         }
     }
