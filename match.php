@@ -19,22 +19,44 @@
             //Richiesta mossa avversario
             if(isset($data['request'])){
                 if($row['round']==$data['player'])
-                echo $row['moves'];
+                    echo $row['moves'];
                 else
-                echo 'no';
+                    echo 'no';
                 exit();
             }
             //Mossa fatta
             $round=!$row['round'];
             $row['moves']=$row['moves'].$data['partenza'].','.$data['pezzo'].','.$data['arrivo'].';';
-            $updateSql="UPDATE matches SET round = ?, moves = ? WHERE match_id = ?";
-            $updateStmt = $conn->prepare($updateSql);
-            if (!$updateStmt) {
-                error_log("Errore SQL: " . $conn->error);
-            }
-            $updateStmt->bind_param("isi",$round,$row['moves'],$_SESSION['game']);
-            if(!$updateStmt->execute()){
-                error_log("Errore SQL: " . $conn->error);    
+            if(isset($data['vittoria'])&&$data['vittoria']){
+                $winnerSql = "UPDATE  matches SET winner = ?, round = ?, moves = ?, ended = ? WHERE match_id = ? AND ended = FALSE" ;
+                $winnerStmt = $conn->prepare($winnerStmt);
+                if (!$winnerStmt) {
+                    error_log("Errore SQL: " . $conn->error);
+                }
+                $winnerStmt->bind_param("iisii", $_SESSION['id'], $round, $row['moves'], true, $_SESSION['game']);
+                if(!$winnerStmt->execute()){
+                    error_log($conn->error);
+                }
+
+                $victoriesSql = "UPDATE users SET victories = victories + 1 WHERE match_id = ?";
+                $victoriesStmt = $conn->prepare($victoriesSql);
+                if (!$victoriesStmt) {
+                    error_log("Errore SQL: " . $conn->error);
+                }
+                $victoriesStmt->bind_param("i", $_SESSION['id']);
+                if(!$victoriesStmt->execute()){
+                    error_log($conn->error);
+                }
+            }else{
+                $updateSql="UPDATE matches SET round = ?, moves = ? WHERE match_id = ? AND ended = FALSE";
+                $updateStmt = $conn->prepare($updateSql);
+                if (!$updateStmt) {
+                    error_log("Errore SQL: " . $conn->error);
+                }
+                $updateStmt->bind_param("isi",$round,$row['moves'],$_SESSION['game']);
+                if(!$updateStmt->execute()){
+                    error_log("Errore SQL: " . $conn->error);    
+                }
             }
             echo "done";
             exit();

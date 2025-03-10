@@ -373,9 +373,12 @@ class Chessboard{
 
 
     static inviaMossa(partenza,pezzo,arrivo){
+        if(pezzo==pedone&&(arrivo.charAt(1)==8||arrivo.charAt(1)==1))
+            //TO DO promozione
         let invio={};
         invio.partenza=partenza;
         invio.pezzo=pezzo;
+        invio.vittoria=Chessboard.scaccoMatto;
         let aggiunta=(Chessboard.scaccoMatto)?"#":((Chessboard.scaccoAvversario)?"+":"")
         invio.arrivo=arrivo+aggiunta;
         Chessboard.scaccoAvversario=false;
