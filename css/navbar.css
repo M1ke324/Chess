@@ -1,0 +1,24 @@
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #EA9010;
+    padding: 0% 1.5%;
+    height: 13%;
+}
+nav>h1 {
+    height: 100%;
+    margin: 0;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 8em;
+    color: white;
+}
+nav>img{
+    align-self: center;
+    height: 6em;
+    width: auto;
+}
+nav>button{
+    background-color: black;
+    color: white;
+}

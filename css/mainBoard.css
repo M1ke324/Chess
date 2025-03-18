@@ -1,0 +1,76 @@
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+*{
+    font-family: 'Roboto', sans-serif;
+    font-size: 1em;
+}
+body{
+    margin: 0;
+    padding: 0;
+    background-color: black;
+}
+main{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+}
+#partiteFatte{
+    grid-row-start: 1;
+    grid-row-end: 3;
+    grid-column-start: 2;
+    grid-column-end: 3;
+}
+main>div{
+    background-color: white;
+    padding: 2em;
+    padding-top: 1.5em;
+    border-radius: 2em;
+    margin:3em;
+}
+#benvenuto>h1{
+    margin: 0;
+}
+#benvenuto{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+h3{
+    font-family: "Comfortaa", sans-serif;
+    font-weight: bold;
+    font-size: 1.5em;
+}
+h2{
+    font-family: "Comfortaa", sans-serif;
+    font-size: 3em;
+}
+#errori{
+    color: white;
+}
+button{
+    padding: 0.5em 1em;
+    max-width: fit-content;
+    font-family: "Comfortaa", sans-serif;
+    border-radius: 2em;
+    border-style: none;
+    color: white;
+    width: 100%;
+    font-size: 1.5em;
+    background-color: #EA9010;
+    cursor: pointer;
+}
+#matchmaking{
+    background-color: black;
+    grid-column-start: 1;
+    grid-column-end: 3;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding:0;
+    margin: 1.5em;
+}
+#gioca{
+    font-size: 2.5em;
+    border-radius: 3em;
+}

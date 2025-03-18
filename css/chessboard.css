@@ -52,11 +52,16 @@
     background-color: red !important;
     cursor: pointer;
 }
-
-.pericolo{
+/*
+    Togliere il commento sotto per vedere le
+    casselle segnate come pericolose
+    durante i test di scacco matto o
+    quando si seleziona il re per muoverlo
+*/
+/*.pericolo{
     background-color: violet !important;
     
-}
+}*/
 .scacco{
     background-color: turquoise !important;
 }

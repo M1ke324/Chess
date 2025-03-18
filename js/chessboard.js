@@ -8,19 +8,18 @@ document.addEventListener("DOMContentLoaded",()=>{
     if(colore){
         if(colore.getAttribute("data-colore")=="N"){
             Chessboard.imBlack();
-            Chessboard.doLoopRequest();
+            Chessboard.checkMove();
         }else
-        Chessboard.imWhite();
+            Chessboard.imWhite();
     }
     Chessboard.createChessboard();
     Chessboard.setUpChessboard();
+    Chessboard.listaMosse=document.getElementById("listaMosse");
 });
 
 class Chessboard{
     static MAX_NUM=8;
     static scelto;
-    static intervalCheckMove;
-    static white;
     static move;
     static scaccoAvversario;
     static scacco;
@@ -29,19 +28,32 @@ class Chessboard{
     static provaDiScacco;
     static scaccoFasullo;
     static partitaFinita;
+    static miaSquadra;
+    static listaMosse;
 
     static imWhite(){
-        Chessboard.white=true;
+        Chessboard.miaSquadra=BIANCO;
         Chessboard.move=true;
     }
 
     static imBlack(){
-        Chessboard.white=false;
+        Chessboard.miaSquadra=NERO;
         Chessboard.move=false;
     }
 
     static moveOpponent(){
         Chessboard.move=!Chessboard.move;
+    }
+
+    static aggiungiMossa(squadra,numeroLetteraIniziale,pezzo,numeroLetteraFinale){
+        let soggetto;
+        if(squadra==Chessboard.miaSquadra)
+            soggetto="Tu:";
+        else
+            soggetto="Avversario:";
+        const elemento=document.createElement("li");
+        elemento.innerText=soggetto+" "+numeroLetteraIniziale+" "+pezzo+" "+numeroLetteraFinale;
+        this.listaMosse.appendChild(elemento);
     }
 
     static createChessboard(){
@@ -61,7 +73,7 @@ class Chessboard{
         let num=0;
         for(let numero=Chessboard.MAX_NUM;numero>=1;numero--){
             //Se siamo neri la scacchiera viene creata sottosopra
-            if(!Chessboard.white)
+            if(Chessboard.miaSquadra==NERO)
                 num=Chessboard.MAX_NUM-numero+1;
             else
                 num=numero
@@ -90,6 +102,7 @@ class Chessboard{
         const img=document.createElement("img");
         img.src=`img/pezzi/${pezzo+squadra}.png`;
         img.id=pezzo+","+squadra+","+lettera+","+numero;
+        img.alt=pezzo+" "+squadra;
         img.onclick=Chessboard.clickPezzo;
         if(classe)
             img.classList.add(classe);
@@ -162,7 +175,7 @@ class Chessboard{
     static sposta(e){
         const casella=e.target;
         let [pezzo,squadra,lettera,numero]= Chessboard.scelto.id.split(",");
-        if(!Chessboard.move||Chessboard.white&&squadra==BIANCO||!Chessboard.white&&squadra==NERO){
+        if(!Chessboard.move||Chessboard.miaSquadra==squadra){
             Chessboard.scelto.parentElement.classList.remove(squadra);
             Chessboard.scelto.parentElement.removeChild(Chessboard.scelto);
             casella.appendChild(Chessboard.scelto);
@@ -193,7 +206,7 @@ class Chessboard{
         const evento={};
         evento.target=pezzoAvversario.parentElement;
         let [,squadra,,]=pezzoAvversario.id.split(",");
-        if(!Chessboard.move||!Chessboard.white&&squadra==BIANCO||Chessboard.white&&squadra==NERO){
+        if(!Chessboard.move||squadra==Chessboard.opposto(Chessboard.miaSquadra)){
             pezzoAvversario.parentElement.classList.remove(squadra);
             pezzoAvversario.parentElement.removeChild(pezzoAvversario);
             Chessboard.sposta(evento);
@@ -204,7 +217,7 @@ class Chessboard{
     //Opzioni utili Sopratuttto per il pedone:
     //Non mangiare permette di specificare se si vuoe evitare di mangiare pezzi avversari nello spostamento
     //Non spostart serve ad indicare caselle dove si può arrivare solo mangiando
-    //re serve a segnalare che sono un re, e a vietare le mosse che meterebbero i npericolo il re
+    //re serve a segnalare che sono un re, e a vietare le mosse che meterebbero in pericolo il re
     static evidenzia(lettera, numero,squadra,nonMangiare=false,nonSpostarti=false,re=false){
         try {
             const casella=document.getElementById(lettera+String(numero))
@@ -219,8 +232,8 @@ class Chessboard{
              * se la casella non è segnata come scacco
              * in quel caso non mi ci posso spostare
             */
-            if(!re&&Chessboard.scacco&&squadra==Chessboard.miaSquadra()&&!casella.classList.contains("scacco")){
-                return false;
+            if(!re&&Chessboard.scacco&&squadra==Chessboard.miaSquadra&&!casella.classList.contains("scacco")){
+                return true;
             }
 
             if(Chessboard.scaccoFasullo&&!casella.classList.contains("scacco")){
@@ -286,12 +299,11 @@ class Chessboard{
         let modificaLetteraP=lettera.charCodeAt(0);
 
         if(squadra==BIANCO&&numero<Chessboard.MAX_NUM){
-            //Se è in posizione di partenza si può muovere di 2
             if(!nonSpostarti){
-                if(numero===2){
-                    funzione(lettera,numero+2,squadra,true,false);
-                }
-                funzione(lettera,numero+1,squadra,true,false);
+                //Se è in posizione di partenza si può muovere di 2
+                if(funzione(lettera,numero+1,squadra,true,false))
+                    if(numero===2)
+                        funzione(lettera,numero+2,squadra,true,false);
             }
             funzione(String.fromCharCode(modificaLetteraP+1),numero+1,squadra,false,true);
             funzione(String.fromCharCode(modificaLetteraP-1),numero+1,squadra,false,true);
@@ -299,10 +311,9 @@ class Chessboard{
         //uguale a sopra ma i pedoni neri si muovo in negativo rispetto ai numeri
         if(squadra==NERO&&numero>2){
             if(!nonSpostarti){
-                if(numero===7){
-                    funzione(lettera,numero-2,squadra,true,false);
-                }
-                funzione(lettera,numero-1,squadra,true,false);
+                if(funzione(lettera,numero-1,squadra,true,false))
+                    if(numero===7)
+                        funzione(lettera,numero-2,squadra,true,false);
             }
             funzione(String.fromCharCode(modificaLetteraP+1),numero-1,squadra,false,true);
             funzione(String.fromCharCode(modificaLetteraP-1),numero-1,squadra,false,true);
@@ -342,7 +353,7 @@ class Chessboard{
         //Rimuove le possibili mosse del pezzo premuto in precedenza
         Chessboard.rimuoviEvidenziate();
         Chessboard.scelto=target;
-        if(Chessboard.miaSquadra()==squadra&&Chessboard.move&&!Chessboard.scacco)
+        if(Chessboard.miaSquadra==squadra&&Chessboard.move&&!Chessboard.scacco)
             Chessboard.controlloAutoScacco(e.target);
         Chessboard.selettoreDiMosse(pezzo,lettera,numero,squadra);
     }
@@ -373,14 +384,13 @@ class Chessboard{
 
 
     static inviaMossa(partenza,pezzo,arrivo){
-        if(pezzo==pedone&&(arrivo.charAt(1)==8||arrivo.charAt(1)==1))
-            //TO DO promozione
         let invio={};
         invio.partenza=partenza;
         invio.pezzo=pezzo;
         invio.vittoria=Chessboard.scaccoMatto;
         let aggiunta=(Chessboard.scaccoMatto)?"#":((Chessboard.scaccoAvversario)?"+":"")
         invio.arrivo=arrivo+aggiunta;
+        Chessboard.aggiungiMossa(Chessboard.miaSquadra,partenza,pezzo,invio.arrivo);
         Chessboard.scaccoAvversario=false;
         fetch('match.php', {
             method: 'POST',
@@ -393,15 +403,11 @@ class Chessboard{
             if(data==="done")
                 Chessboard.moveOpponent();
                 if(!Chessboard.partitaFinita)
-                    Chessboard.doLoopRequest();
+                    Chessboard.checkMove();
             })
             .catch(error => {
                 console.error('Errore:', error);
-            });
-        }
-        
-    static doLoopRequest(){            
-        Chessboard.intervalCheckMove=setInterval(Chessboard.checkMove, 1500);
+        });
     }
 
     static movePiece(start,piece,end){
@@ -419,17 +425,11 @@ class Chessboard{
             }
         }
     }
-    static miaSquadra(){
-        if(Chessboard.white)
-            return BIANCO;
-        else
-            return NERO;
-    }
 
     static checkMove(){
         let invio={};
         invio.request=true;
-        invio.player=Chessboard.white;
+        invio.player=(Chessboard.miaSquadra==BIANCO);
         
         fetch('match.php', {
             method: 'POST',
@@ -439,8 +439,9 @@ class Chessboard{
         .then(response => response.text())
         .then(data => {
             console.log(data);
-            if(data!=="no"){
-                clearInterval(Chessboard.intervalCheckMove);
+            if(data==="no"){
+                setTimeout(Chessboard.checkMove(), 1000);
+            }else{
                 let moves=data.split(";");
                 let lastMove=moves[moves.length-2].split(",");
                 //Controllo scacco/scacco matto;
@@ -456,10 +457,11 @@ class Chessboard{
                     }
                     lastMove[2]=String(lastMove[2].charAt(0))+String(lastMove[2].charAt(1));
                 }
+                Chessboard.aggiungiMossa(Chessboard.opposto(Chessboard.miaSquadra),lastMove[0],lastMove[1],lastMove[2]);
                 Chessboard.movePiece(lastMove[0],lastMove[1],lastMove[2]);
                 if(Chessboard.scacco)
-                    Chessboard.preparazioneScacco(lastMove[2],lastMove[1],Chessboard.opposto(Chessboard.miaSquadra()));
-                    
+                    Chessboard.preparazioneScacco(lastMove[2],lastMove[1],Chessboard.opposto(Chessboard.miaSquadra));
+                
                 Chessboard.moveOpponent();
             }
         })
@@ -580,7 +582,7 @@ class Chessboard{
     static generaPostiPericolosi(squadraPredefinita=false,scacco=false,funzione=Chessboard.evidenziaPuntiMangiabili,saltaRe=false){
         let pezzi;
         if(squadraPredefinita===false)
-            pezzi=document.querySelectorAll("#chessboard ."+Chessboard.opposto(Chessboard.miaSquadra()));
+            pezzi=document.querySelectorAll("#chessboard ."+Chessboard.opposto(Chessboard.miaSquadra));
         else
             pezzi=document.querySelectorAll("#chessboard ."+squadraPredefinita);
         
@@ -605,12 +607,12 @@ class Chessboard{
     //Controlla se c'è uno scacco matto chiamata dopo il controllo di uno scacco che ha avuto successo, alla fine di ogni mossa
     static controlloScaccoMatto(pezzo,lettera,numero,squadra){
 
-        let re=document.getElementsByClassName("re"+((Chessboard.white)?NERO:BIANCO));
+        let re=document.getElementsByClassName("re"+(Chessboard.opposto(Chessboard.miaSquadra)));
         re=re[0];
         let [,squadraRe/*Avversaria*/,letteraRe,numeroRe]=re.id.split(",");
         Chessboard.scaccoMatto=true;
         //genero i posti in cui c'è scacco per il re avversario
-        Chessboard.preparazioneScacco(/*casella*/String(lettera)+String(numero),pezzo,Chessboard.miaSquadra());
+        Chessboard.preparazioneScacco(/*casella*/String(lettera)+String(numero),pezzo,Chessboard.miaSquadra);
         //genero i posti pericolosi cell'avversario, cioè i posti dove lui può muovere o mangiare
         //controllo se un posto pericoloso si sovrapppone ad un posto scacco
         //c'ò vorrebbe dire che qualcuno può mettere a riparo del re in scacco
@@ -622,7 +624,7 @@ class Chessboard{
         //Se nessuno dei suoi pezzi si può opporre al mio scacco
         if(!Chessboard.scaccoMatto){
             //genero i miei posti pericolosi
-            Chessboard.generaPostiPericolosi(Chessboard.miaSquadra());
+            Chessboard.generaPostiPericolosi(Chessboard.miaSquadra);
             //Controllo se ha dei posti in cui può muoversi che non siano pericolosi, in cui non ci siano pezzi suoi
             Chessboard.evidenziaRe(letteraRe,numeroRe,squadraRe,Chessboard.siPuoMuovere);
         }
@@ -630,7 +632,6 @@ class Chessboard{
         if(Chessboard.scaccoMatto){
             Chessboard.scaccoMatto;
             //FINE PARTITA
-            clearInterval(Chessboard.intervalCheckMove);
             Chessboard.partitaFinita=true;
             console.log("fine partita");
         }

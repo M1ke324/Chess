@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+*{
+    font-family: 'Roboto', sans-serif;
+    font-size: 1em;
+}
+body{
+    margin: 0;
+    padding: 0;
+    background-color: black;
+}
+main{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+main>div{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    box-sizing: border-box;
+    height: max-content;
+    margin: 2.5%;
+    margin-bottom: 0;
+    border-radius: 3em;
+    background-color: white;
+}
+p{
+    margin: 0.25em;
+}
+#tavola{
+    grid-column-start: 1;
+    grid-column-end: 2;
+    padding:2em;
+    width: fit-content;
+    margin: 3% 18%;
+}
+#mosse{
+    grid-row-start: 1;
+    grid-row-end: 3;
+    grid-column-start: 2;
+    grid-column-end: 3;
+    height: 93%;
+    width: 70%;
+}
+#mosse>ol{
+    height: 90%;
+    overflow-y: auto;
+}
+#mosse>h2{
+    font-family: "Comfortaa", sans-serif;
+    font-size: 3em;
+    margin-bottom: 0;
+    margin-top: 0.5em;
+}
+#datiAvversario{
+    padding: 2%;
+    width: 90%;
+}
+button{
+    padding: 0.5em 1em;
+    max-width: fit-content;
+    font-family: "Comfortaa", sans-serif;
+    border-radius: 2em;
+    border-style: none;
+    color: white;
+    width: 100%;
+    font-size: 1.5em;
+    background-color: #EA9010;
+    cursor: pointer;
+}
