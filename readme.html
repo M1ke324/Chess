@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Documentazione</title>
+</head>
+<body>
+    <h1>PAWN</h1>
+    <p>Pawn è un sito web che permette di giocare a scacchi contro altri utenti reali.</p>
+    <article>
+        <h2>Funzionalità</h2>
+        Il sito integra nel gioco le seguenti Funzionalità:
+        <ul>
+            <li>
+                <h3>Guida sulle mosse</h3>
+                Al click di un pezzo vengono mostrate con il colore verde tutte le possibili mosse che il pezzo può fare, invece vengono colorate di rosso le caselle in cui è possibile mangiare un pezzo avversario. 
+                Nonstante la visualizazzione delle mosse sia sempre disponibile e per ogni squadra; al contrario il movimento di un pezzo è possibile solo per la propria squadra e solo nel proprio turno, ciò viene comunicato all'utente attraverso la modifica dell'aspetto del cursore del mouse che viene mostrato come puntatore.
+            </li>
+            <li>
+                <h3>Riconoscimento dello scacco</h3>
+                Dopo ogni turno vengono generate tutte le possibili mosse del pezzo appena spostato, se nella generazione si incontra una casella contenente il re viene segnalato lo scacco.
+            </li>
+            <li>
+                <h3>Restrizioni in fase di scacco</h3>
+                Nel caso in cui il giocatore avversario ci faccia scacco, le nostre mosse saranno limitate alle sole caselle (colorate di blu) che permettono o di mangiare il pezzo attaccante o di interporre un pezzo tra il re e il pezzo attaccante (ad esclusione dei casi in cui esso è un pedone o un cavallo).
+            </li>
+            <li>
+                <h3>Scacco matto</h3>
+                Il sito permetto il riconoscimento automatico dello scacco e la successiva terminazione della partita con l'assegnazione del punto al vincitore.<br>
+                Il rilevamento dello scacco matto avviene in questo modo:
+                <ol>
+                    <li>
+                        Il giocatore effettua uno scacco all'avvversario
+                    </li>
+                    <li>
+                        Si generano le caselle di scacco (in cui è possibile o mangiare il pezzo che fa scacco, o difendere il re)
+                    </li>
+                    <li>
+                        Vengono generate tutte le possibili mosse dell'avversario (apparte quelle del re), se si sovrappongono alle caselle di scacco, allora vuol dire che un pezzo può salvare il re. Per cui non è uno scacco matto. Altrimenti ...
+                    </li>
+                    <li>
+                        Vengono genrate tutte le mosse del giocatore 
+                    </li>
+                    <li>
+                        Si controllano le caselle adiacenti al re se si trovano solamente caselle contenenti pezzi avversari o caselle segnalate, allora si segnala lo scacco matto!
+                    </li>
+                </ol>
+            </li>
+            <li>
+                <h3>Controlo autoscacco</h3>
+                Se è il proprio turno e si seleziona un proprio pezzo, prima di evideniare le possibili mossse il pezzo viene rimosso, vengono generate tutte le mosse dell'avversario. Se queste mosse rivelano uno scacco allora vengono generate le "caselle di scaccco", che permettono di muovere il pezzo solo nei punti in cui non ci si espone ad uno scacco.
+            </li>
+            <li>Abbandono</li>
+        </ul>
+    </article>
+</body>
+</html>

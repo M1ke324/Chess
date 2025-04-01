@@ -4,14 +4,16 @@ document.addEventListener("DOMContentLoaded", ()=>{
     errori=document.getElementById("errori");
     button=document.getElementById("gioca");
     button.addEventListener("click", gioca);
+    document.getElementById("esci")
+        .addEventListener("click", ()=>{
+            window.location.href="index.php";
+        });
 })
 
-let timeout;
 function gioca(e){
     button.disabled=true;
 
     mostraMessaggio("Matchmaking...")
-    timeout=setInterval(request,1000);
     request();
 
 }
@@ -27,15 +29,14 @@ function request(){
         console.log(data)
         if(data.success){
             mostraMessaggio("Match ready!")
-            clearInterval(timeout);
             window.location.href = data.redirect;
-        }
+        }else
+            setTimeout(request,1000);
     })
     .catch(error => {
         console.error('Errore:', error);
         button.disabled = false;
     });
-    
 }
 
 

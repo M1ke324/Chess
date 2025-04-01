@@ -69,3 +69,20 @@ button{
     background-color: #EA9010;
     cursor: pointer;
 }
+#risultato{
+    grid-row-start: 3;
+    grid-row-end: 4;
+    grid-column-start: 1;
+    grid-column-end: 3;
+    background-color: black;
+    color: #EA9010;
+    font-size: 1.5em;
+    font-weight: bold;
+    margin: 0%;
+    padding: 0%;
+}
+button:disabled{
+    background-color: rgba(49, 49, 49, 0.877);
+    color: rgb(199, 199, 199,0.877);
+    cursor: default;
+}

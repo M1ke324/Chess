@@ -46,22 +46,23 @@
 }
 #chessboard .evidenziata{
     background-color: lime !important;
-    cursor: pointer;
 }
 #chessboard .avversario{
     background-color: red !important;
-    cursor: pointer;
 }
 /*
-    Togliere il commento sotto per vedere le
-    casselle segnate come pericolose
-    durante i test di scacco matto o
-    quando si seleziona il re per muoverlo
+Togliere il commento sotto per vedere le
+casselle segnate come pericolose
+durante i test di scacco matto o
+quando si seleziona il re per muoverlo
 */
-/*.pericolo{
+.pericolo{
     background-color: violet !important;
     
-}*/
+}
 .scacco{
     background-color: turquoise !important;
+}
+.click{
+    cursor: pointer;
 }

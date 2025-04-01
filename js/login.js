@@ -71,7 +71,7 @@ class Login{
             
             const form = new FormData();
             form.append('username', this.username.value);
-            form.append('password', CryptoJS.SHA256(this.password.value));
+            form.append('password', this.password.value);
             
             fetch('index.php', {
                 method: 'POST',
@@ -129,7 +129,7 @@ class Login{
             const form = new FormData();
             form.append('username', this.usernameReg.value);
             form.append('email',this.emailReg.value);
-            form.append('password', CryptoJS.SHA256(this.passwordReg.value).toString());
+            form.append('password', this.passwordReg.value);
             
             fetch('index.php', {
                 method: 'POST',

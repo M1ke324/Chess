@@ -1,5 +1,12 @@
 <?php
     session_start();
+    //Controllo che l'utente abbia tutto il necessario per accedere
+    if(!isset($_SESSION['username'])||
+        !isset($_SESSION['id'])||
+        !isset($_SESSION['email'])){
+            header("Location: index.php");
+            exit();
+    }
     include "config.php";
 
     function fine($response){
@@ -51,48 +58,52 @@
         'game' => 0,
         'piece' => false //true-> white false->black
     ];
-    //Se game non è settato (e quindi accedo per la prima volta) cerco/creao una nuova, altrimenti guardo gameEnded()
-    if(!isset($_SESSION['game'])||gameWaiting()){
-        //Se il giocatore non si era già messo in matchmaking, cerco altri giocatori pronti per un match    
-        $sql = "SELECT * FROM matches WHERE player2_id IS NULL AND waiting = TRUE ";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if ($result->num_rows > 0) {
-            $row = $result->fetch_assoc();
-            //Aggiorno il database aggiungendo il nuovo giocatore per avvertire il primo che la partita è pronta
-            $updatePlayer2Sql = "UPDATE matches SET player2_id = ? WHERE match_id = ?";
-            $updatePlayer2Stmt = $conn->prepare($updatePlayer2Sql);
-            $updatePlayer2Stmt->bind_param("ii", $_SESSION['id'], $row["match_id"]);
-
-            if (!$updatePlayer2Stmt->execute()) {
-                error_log("Errore durante l'aggiornamento di player2: " . $conn->error);
-            }
-            success($response,false,$row['player1_id'],$row['match_id']);
-        } else {
-            //Se non c'è nessun giocatore pronto a giocare all'ora mi metto in attesa di un giocatore
-            $insertMatchSql = "INSERT INTO matches (player1_id) VALUES (?)";
-            $insertMatchStmt = $conn->prepare($insertMatchSql);
-            $insertMatchStmt->bind_param("i", $_SESSION['id']);
-            
-            if (!$insertMatchStmt->execute()) {
-                error_log("Errore durante il matchmaking: " . $conn->error);
-            }
-            $checkPlayer1Sql = "SELECT * FROM matches WHERE player1_id = ? AND player2_id IS NULL AND waiting = TRUE";
-            $checkPlayer1Stmt = $conn->prepare($checkPlayer1Sql);
-            if (!$checkPlayer1Stmt) {
-                error_log("Errore nella ricerca del match_id: " . $conn->error);
-            }    
-            $checkPlayer1Stmt->bind_param("i", $_SESSION['id']);
-            $checkPlayer1Stmt->execute();
-            $player1Result = $checkPlayer1Stmt->get_result();
-            if ($player1Result->num_rows > 0) {
-                $row = $player1Result->fetch_assoc();
-                $response['game']=$row['match_id'];
-                $_SESSION['game']=$row['match_id'];
+    $count=0;
+    do{
+        //Se game non è settato (e quindi accedo per la prima volta) cerco/creao una nuova, altrimenti guardo gameEnded()
+        if(!isset($_SESSION['game'])||gameWaiting()){
+            //Se il giocatore non si era già messo in matchmaking, cerco altri giocatori pronti per un match    
+            $sql = "SELECT * FROM matches WHERE player2_id IS NULL AND waiting = TRUE ";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($result->num_rows > 0) {
+                $row = $result->fetch_assoc();
+                //Aggiorno il database aggiungendo il nuovo giocatore per avvertire il primo che la partita è pronta
+                $updatePlayer2Sql = "UPDATE matches SET player2_id = ? WHERE match_id = ?";
+                $updatePlayer2Stmt = $conn->prepare($updatePlayer2Sql);
+                $updatePlayer2Stmt->bind_param("ii", $_SESSION['id'], $row["match_id"]);
+                
+                if (!$updatePlayer2Stmt->execute()) {
+                    error_log("Errore durante l'aggiornamento di player2: " . $conn->error);
+                }
+                success($response,false,$row['player1_id'],$row['match_id']);
+            } else {
+                //Se non c'è nessun giocatore pronto a giocare all'ora mi metto in attesa di un giocatore
+                $insertMatchSql = "INSERT INTO matches (player1_id) VALUES (?)";
+                $insertMatchStmt = $conn->prepare($insertMatchSql);
+                $insertMatchStmt->bind_param("i", $_SESSION['id']);
+                
+                if (!$insertMatchStmt->execute()) {
+                    error_log("Errore durante il matchmaking: " . $conn->error);
+                }
+                $checkPlayer1Sql = "SELECT * FROM matches WHERE player1_id = ? AND player2_id IS NULL AND waiting = TRUE";
+                $checkPlayer1Stmt = $conn->prepare($checkPlayer1Sql);
+                if (!$checkPlayer1Stmt) {
+                    error_log("Errore nella ricerca del match_id: " . $conn->error);
+                }    
+                $checkPlayer1Stmt->bind_param("i", $_SESSION['id']);
+                $checkPlayer1Stmt->execute();
+                $player1Result = $checkPlayer1Stmt->get_result();
+                if ($player1Result->num_rows > 0) {
+                    $row = $player1Result->fetch_assoc();
+                    $response['game']=$row['match_id'];
+                    $_SESSION['game']=$row['match_id'];
+                }
             }
         }
-    }
+        sleep(2);
+    }while($count++<30);
     fine($response);
     
     //CHIUDERE LE CONNESSIONI?

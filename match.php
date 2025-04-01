@@ -1,5 +1,16 @@
 <?php
     session_start();
+    //Controllo che l'utente abbia tutto ciò che serve per accedere
+    if(!isset($_SESSION['username'])||
+        !isset($_SESSION['id'])||
+        !isset($_SESSION['email'])||
+        !isset($_SESSION['piece'])||
+        !isset($_SESSION['game'])||
+        !isset($_SESSION['opponent'])
+            ){
+            header("Location: index.php");
+            exit();
+    }
     include "config.php";
 
     if($_SERVER['REQUEST_METHOD']=="POST"){
@@ -34,19 +45,22 @@
                 //Mossa fatta
                 $round=!$row['round'];
                 $row['moves']=$row['moves'].$data['partenza'].','.$data['pezzo'].','.$data['arrivo'].';';
-                if(isset($data['vittoria'])&&$data['vittoria']){
+                if(isset($data['vittoria'])){
                     $winnerSql = "UPDATE  matches SET winner = ?, round = ?, moves = ?, ended = ? WHERE match_id = ? AND ended = FALSE" ;
                     $winnerStmt = $conn->prepare($winnerSql);
                     if (!$winnerStmt) {
                         error_log("Errore SQL: " . $conn->error);
                     }
                     $vero=true;
-                    $winnerStmt->bind_param("iisii", $_SESSION['id'], $round, $row['moves'],$vero, $_SESSION['game']);
+                    if($data['vittoria'])
+                        $winnerStmt->bind_param("iisii", $_SESSION['id'], $round, $row['moves'],$vero, $_SESSION['game']);
+                    else
+                        $winnerStmt->bind_param("iisii", $_SESSION['opponent'], $round, $row['moves'],$vero, $_SESSION['game']);
                     if(!$winnerStmt->execute()){
                         error_log($conn->error);
                     }
                     
-                    $victoriesSql = "UPDATE users SET victories = victories + 1 WHERE match_id = ?";
+                    $victoriesSql = "UPDATE users SET victories = victories + 1 WHERE id = ?";
                     $victoriesStmt = $conn->prepare($victoriesSql);
                     if (!$victoriesStmt) {
                         error_log("Errore SQL: " . $conn->error);
@@ -117,6 +131,8 @@
             <h2>Mosse:</h2>
             <ol id="listaMosse">
             </ol>
+        </div>
+        <div id="risultato">
         </div>
     </main>
 </body>

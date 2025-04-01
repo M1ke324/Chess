@@ -1,5 +1,11 @@
     <?php
         session_start();
+        //Se si è già loggati funziona da logout
+        if(isset($_SESSION['id'])){
+            session_unset();
+            session_destroy();
+        }
+
         include "config.php";
         
         function controlloDatiUtente($dati){
@@ -44,12 +50,19 @@
                 fine($response);
             }
 
+            if(!preg_match($regExp, $password)){
+                $response['message']='Formato Passwrod non valido';
+                fine($response);
+            }
+            
             if(isset($_POST['email'])){
                 $email = controlloEmail($_POST['email']);
                 if (empty($username)) {
                     $response['message'] = 'Username richiesto';
                     fine($response);
                 }
+
+                $password=password_hash($password,PASSWORD_DEFAULT);
 
                 $stmt = $conn->prepare("INSERT INTO users (username, email, password) VALUES ( ?, ?, ?)");
                 if($stmt){
@@ -65,11 +78,12 @@
                         $response['message'] = 'registrazione effettuata con successo';
                         $response['redirect'] = 'mainBoard.php';
                     }else{
+                        //Numero di errore per una violazione di unique 
                         if ($conn->errno == 1062) {
-                            // Recupera il messaggio di errore
+                            //Recupera il messaggio di errore
                             $messaggioErrore = $conn->error;
                     
-                            // Identifica il campo UNIQUE violato
+                            //Identifica il campo UNIQUE violato
                             if (strpos($messaggioErrore, 'email') !== false) {
                                 $response['message'] = "L'email è già in uso.";
                             } elseif (strpos($messaggioErrore, 'username') !== false) {
@@ -97,7 +111,7 @@
                     $result = $stmt->get_result();
                     if ($result->num_rows === 1) {
                         $row = $result->fetch_assoc();
-                        if ($row['password'] === $password){
+                        if (password_verify($password,$row['password'])){
                             $_SESSION['username'] = $row['username'];
                             $_SESSION['id'] = $row['id'];
                             $_SESSION['email'] = $row['email'];
@@ -123,7 +137,6 @@
     <link rel="icon" type="image/png" href="img/favicon.png" sizes="32x32">
     <link rel="stylesheet" href="css/login.css">
     <meta charset="UTF-8">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script src="js/login.js"></script>
     <title>Login</title>
 </head>

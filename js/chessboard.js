@@ -15,36 +15,41 @@ document.addEventListener("DOMContentLoaded",()=>{
     Chessboard.createChessboard();
     Chessboard.setUpChessboard();
     Chessboard.listaMosse=document.getElementById("listaMosse");
+    Chessboard.abbandona=document.getElementById("abbandona");
+    Chessboard.resa=()=>Chessboard.inviaMossa("","","",true);
+    Chessboard.abbandona.addEventListener("click",Chessboard.resa);
 });
 
 class Chessboard{
     static MAX_NUM=8;
     static scelto;
     static move;
+    static resa;
+    static abbandona;
     static scaccoAvversario;
     static scacco;
     static scaccoMatto;
-    static cercoScaccoMatto;
     static provaDiScacco;
     static scaccoFasullo;
     static partitaFinita;
     static miaSquadra;
     static listaMosse;
 
+    //Imposta la partita per giocare con i bianchi
     static imWhite(){
         Chessboard.miaSquadra=BIANCO;
         Chessboard.move=true;
     }
-
+    //Imposta la partita per giocare con i neri
     static imBlack(){
         Chessboard.miaSquadra=NERO;
         Chessboard.move=false;
     }
-
+    // Attiva/disattiva la possibilita di muovere i pezzi
     static moveOpponent(){
         Chessboard.move=!Chessboard.move;
     }
-
+    //Aggiunge la mossa alla liste della mosse fatte durante la partita
     static aggiungiMossa(squadra,numeroLetteraIniziale,pezzo,numeroLetteraFinale){
         let soggetto;
         if(squadra==Chessboard.miaSquadra)
@@ -54,6 +59,24 @@ class Chessboard{
         const elemento=document.createElement("li");
         elemento.innerText=soggetto+" "+numeroLetteraIniziale+" "+pezzo+" "+numeroLetteraFinale;
         this.listaMosse.appendChild(elemento);
+    }
+    //Con testo cambia il titolo della pagine, normalmente è PAWN
+    //Con messaggio si manda un messaggio allutente in fondo alla pagina
+    static messaggio(testo,spiegazione){
+        testo=String(testo);
+        spiegazione=String(spiegazione);
+        const pawn=document.getElementById("pawn");
+        pawn.innerText=testo;
+        pawn.style.color="#AF1B3F";
+        const risultato=document.getElementById("risultato");
+        risultato.innerText=spiegazione;
+        Chessboard.abbandona.innerText="ESCI";
+        Chessboard.abbandona.style.backgroundColor="#AF1B3F";
+        Chessboard.abbandona.disabled=false;
+        Chessboard.abbandona.removeEventListener("click", resa);
+        Chessboard.abbandona.addEventListener("click",()=>{
+            window.location.href="mainBoard.php";
+        });
     }
 
     static createChessboard(){
@@ -243,8 +266,11 @@ class Chessboard{
             if(casella.classList.contains(Chessboard.opposto(squadra))){
                 if(!nonMangiare){
                     casella.classList.add("avversario");
-                    if(Chessboard.move)
+                    if(Chessboard.move){
+                        if(squadra==Chessboard.miaSquadra)
+                        casella.classList.add("click");
                         casella.firstChild.onclick=Chessboard.mangia;
+                    }
                 }
                 return false;
             }
@@ -257,8 +283,10 @@ class Chessboard{
                 return false; 
             //Evidenzia il posto come possibile per il movimento
             casella.classList.add("evidenziata");
-            if(Chessboard.move)
+            if(Chessboard.move){
+                casella.classList.add("click");
                 casella.onclick=Chessboard.sposta;
+            }
             return true;
         } catch (error) {
             //Se esce dalla scacchiera avverte ritornando false
@@ -383,12 +411,25 @@ class Chessboard{
     }
 
 
-    static inviaMossa(partenza,pezzo,arrivo){
+    static inviaMossa(partenza,pezzo,arrivo,resa=false){
         let invio={};
         invio.partenza=partenza;
         invio.pezzo=pezzo;
-        invio.vittoria=Chessboard.scaccoMatto;
-        let aggiunta=(Chessboard.scaccoMatto)?"#":((Chessboard.scaccoAvversario)?"+":"")
+        let aggiunta="";
+        if(resa){
+            Chessboard.messaggio("RESA","Ti sei arreso")
+            Chessboard.partitaFinita=true;
+            invio.vittoria=false;
+            aggiunta="Resa";
+        }else if(Chessboard.scaccoMatto){
+            invio.vittoria=true;
+            Chessboard.messaggio("VITTORIA","Complimenti!")
+            aggiunta="#";
+            }else {
+                Chessboard.abbandona.disabled=true;
+                if(Chessboard.scaccoAvversario)
+                    aggiunta="+";
+            }
         invio.arrivo=arrivo+aggiunta;
         Chessboard.aggiungiMossa(Chessboard.miaSquadra,partenza,pezzo,invio.arrivo);
         Chessboard.scaccoAvversario=false;
@@ -413,6 +454,10 @@ class Chessboard{
     static movePiece(start,piece,end){
         const startingSquare=document.getElementById(start);
         const endingSquare=document.getElementById(end);
+        endingSquare.style.backgroundColor="#D38B5D";
+        setTimeout(()=>{
+            endingSquare.style.backgroundColor="";
+        },3000);
         if(startingSquare.firstChild){
             Chessboard.scelto=startingSquare.firstChild;
             const evento={};
@@ -446,17 +491,23 @@ class Chessboard{
                 let lastMove=moves[moves.length-2].split(",");
                 //Controllo scacco/scacco matto;
                 if(lastMove[2].charAt(2)){
+                    //Scaccomatto
                     if(lastMove[2].charAt(2)=="#"){
-                        //Scaccomatto
-                        //TODO FINEPARITA
-                        console.log("FINE PARTITA")
+                        Chessboard.messaggio("SCONFITTA","Scacco matto. La prossima volta");
+                        console.log("FINE PARTITA");
                     }
-                    if(lastMove[2].charAt(2)=="+"){
-                        //Scacco
-                        Chessboard.scacco=true;
-                    }
-                    lastMove[2]=String(lastMove[2].charAt(0))+String(lastMove[2].charAt(1));
+                    //Scacco
+                    Chessboard.scacco=(lastMove[2].charAt(2)=="+");
+
+                    //Resa
+                    //Oppure rimuove il + e il # per spostare il pezzo
+                    if(lastMove[2]=="Resa"){
+                        console.log("FINE PARTITA");
+                        Chessboard.messaggio("VITTORIA","L'avversario si è arreso");
+                    }else
+                        lastMove[2]=String(lastMove[2].charAt(0))+String(lastMove[2].charAt(1));
                 }
+                Chessboard.abbandona.disabled=false;
                 Chessboard.aggiungiMossa(Chessboard.opposto(Chessboard.miaSquadra),lastMove[0],lastMove[1],lastMove[2]);
                 Chessboard.movePiece(lastMove[0],lastMove[1],lastMove[2]);
                 if(Chessboard.scacco)
@@ -478,7 +529,7 @@ class Chessboard{
         }
         let re=document.getElementsByClassName("re"+squadraRe);
         re=re[0];
-        let [,/*Avversaria*/,letteraRe,numeroRe]=re.id.split(",");
+        let [,,/*Avversaria*/letteraRe,numeroRe]=re.id.split(",");
         let [letteraScacco,numeroScacco]=[casella.charAt(0),casella.charAt(1)]
         letteraScacco=letteraScacco.charCodeAt(0)
         while(true){
@@ -535,13 +586,13 @@ class Chessboard{
      * in modo da controllare se ha possibilita di muoversi il re. E se è attivo ScaccoMatto controlla se una zona pericolosa si sovrappone con una zona
      * di scacco in questo caso non è scacco matto, perchè il re può essere salvato spostando un'altro pezzo tra il re e lo scacco
     */
-    static evidenziaPuntiMangiabili(lettera,numero,squadra/*,nonMangiare=false,nonSpostarti=false*/){
+    static evidenziaPuntiMangiabili(lettera,numero,squadra,nonMangiare=false,nonSpostarti=false){
         try{
             const casella=document.getElementById(lettera+String(numero))
             //Sto selezionando le mosse dell'avversario, quindi se c'è un pezzo è mio non è pericolo e smette di cercare in quella direzione
             if(casella.classList.contains(Chessboard.opposto(squadra))){
                 casella.classList.add("pericolo");
-                if(Chessboard.cercoScaccoMatto){
+                if(Chessboard.scaccoMatto){
                     if(casella.classList.contains("scacco")){
                         console.log("non è scacco matto, un pezzo può mangiare il pezzo che fa scacco")
                         Chessboard.scaccoMatto=false;
@@ -552,22 +603,16 @@ class Chessboard{
             //se c'è un pezzo della squadra avversaria, lo segna come pericolo per segnalarmi che non posso mangiarlo
             if(casella.classList.contains(squadra)){
                 casella.classList.add("pericolo");
-                /*if(Chessboard.cercoScaccoMatto){
-                    if(casella.classList.contains("scacco")){
-                        console.log("non è scacco matto, il re può mangiare un pezzo avversario")
-                        Chessboard.scaccoMatto=false;
-                    }
-                }*/
                 return false;
             }
             //Se sto cercando degli scacchi matti il pedone non può muoversi di lato senza che ci sia un un pezzo
-            //if(Chessboard.cercoScaccoMatto&&nonSpostarti)
-                //return false;
+            if(Chessboard.scaccoMatto&&!nonMangiare&nonSpostarti)
+                return false;
             //altrimenti  l'avvversario identifica la casella come mangiabile e continua a spostarsi in quella direzione
             casella.classList.add("pericolo");
-            if(Chessboard.cercoScaccoMatto){
+            if(Chessboard.scaccoMatto){
                 if(casella.classList.contains("scacco")){
-                    console.log("non è scacco matto, un pezzo si può mettere nel mezzo")
+                    console.log("non è scacco matto, un pezzo si può mettere nel mezzo: "+lettera+numero+squadra)
                     Chessboard.scaccoMatto=false;
                 }
             }
@@ -579,7 +624,7 @@ class Chessboard{
     }
     //fa fare ad ogni pezzo una determinata funzione, che se non specificata è la generazione dei punti pericolosi della squadra data come argomento
     //se non viene data è la squadra avversaria
-    static generaPostiPericolosi(squadraPredefinita=false,scacco=false,funzione=Chessboard.evidenziaPuntiMangiabili,saltaRe=false){
+    static generaPostiPericolosi(squadraPredefinita=false,funzione=Chessboard.evidenziaPuntiMangiabili,saltaRe=false){
         let pezzi;
         if(squadraPredefinita===false)
             pezzi=document.querySelectorAll("#chessboard ."+Chessboard.opposto(Chessboard.miaSquadra));
@@ -587,8 +632,6 @@ class Chessboard{
             pezzi=document.querySelectorAll("#chessboard ."+squadraPredefinita);
         
             let pezzo;
-        if(scacco)
-            Chessboard.cercoScaccoMatto=true;
         for(pezzo of pezzi){
             let [tipoPezzo,squadra,lettera,numero]=pezzo.firstChild.id.split(",");
             //Ste sto cercando se un pezzo può andare sopra un punto di scacco per salvare il re
@@ -601,8 +644,6 @@ class Chessboard{
                 break;
             }
         }
-        if(scacco)
-            Chessboard.cercoScaccoMatto=false;
     }
     //Controlla se c'è uno scacco matto chiamata dopo il controllo di uno scacco che ha avuto successo, alla fine di ogni mossa
     static controlloScaccoMatto(pezzo,lettera,numero,squadra){
@@ -616,21 +657,20 @@ class Chessboard{
         //genero i posti pericolosi cell'avversario, cioè i posti dove lui può muovere o mangiare
         //controllo se un posto pericoloso si sovrapppone ad un posto scacco
         //c'ò vorrebbe dire che qualcuno può mettere a riparo del re in scacco
-        Chessboard.generaPostiPericolosi(false,true,Chessboard.evidenziaPuntiMangiabili,true);
+        Chessboard.generaPostiPericolosi(false,Chessboard.evidenziaPuntiMangiabili,true);
         Chessboard.rimuoviClasse("scacco");
         Chessboard.rimuoviClasse("pericolo");
 
 
         //Se nessuno dei suoi pezzi si può opporre al mio scacco
-        if(!Chessboard.scaccoMatto){
+        if(Chessboard.scaccoMatto){
             //genero i miei posti pericolosi
             Chessboard.generaPostiPericolosi(Chessboard.miaSquadra);
             //Controllo se ha dei posti in cui può muoversi che non siano pericolosi, in cui non ci siano pezzi suoi
-            Chessboard.evidenziaRe(letteraRe,numeroRe,squadraRe,Chessboard.siPuoMuovere);
+            Chessboard.evidenziaRe(letteraRe,Number(numeroRe),squadraRe,Chessboard.siPuoMuovere,true);
         }
         Chessboard.rimuoviClasse("pericolo");
         if(Chessboard.scaccoMatto){
-            Chessboard.scaccoMatto;
             //FINE PARTITA
             Chessboard.partitaFinita=true;
             console.log("fine partita");
@@ -639,7 +679,8 @@ class Chessboard{
     
     //Controlla se in una posizione ci si può muovere, creata per controllare se c'è uno scacco
     static siPuoMuovere(lettera, numero, squadra){
-        //Se ha gia visto un posot in cui si può muovere non occorre che cerchi oltre
+        console.log(String(lettera)+numero+squadra);
+        //Se ha gia visto un posto in cui si può muovere non occorre che cerchi oltre
         if(!Chessboard.scaccoMatto)
             return false;
         try{
@@ -676,7 +717,7 @@ class Chessboard{
         padre.removeChild(casella);
         Chessboard.provaDiScacco=true;
         Chessboard.scaccoFasullo=false;
-        Chessboard.generaPostiPericolosi(false,false,Chessboard.ceUnoScacco);
+        Chessboard.generaPostiPericolosi(false,Chessboard.ceUnoScacco);
         Chessboard.provaDiScacco=false;
         padre.appendChild(casella);
         if(Chessboard.scaccoFasullo){

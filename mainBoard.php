@@ -1,5 +1,11 @@
 <?php
     session_start();
+    if(!isset($_SESSION['username'])||
+        !isset($_SESSION['id'])||
+        !isset($_SESSION['email'])){
+            header("Location: index.php");
+            exit();
+    }
     include "config.php";
 ?>
 <html lang="it">
@@ -69,7 +75,7 @@
                     if ($matchesResult->num_rows > 0) {
                         while($row = $matchesResult->fetch_assoc()){
                             echo "<li>";
-                            echo $row["moves"];
+                            echo str_replace(","," ",$row["moves"]);
                             echo "</li>";
                         }
                     }else if($matchesResult->num_rows == 0){
