@@ -42,31 +42,52 @@
             }
             ?></h2>
         </div>
-        <div>
-            <h3>statistiche</h3>
-            <p>Vittorie: <?php
-                    if(isset($_SESSION['victories'])){
-                        echo $row['victories'];
-                    } else{
-                        echo '0';
-                    }        
-                    ?></p>
-            <p>Partiegiocate: <?php
-                $matchesSql = "SELECT * FROM matches WHERE (player1_id = ?  OR player2_id = ?) AND ended=true;";
-                $matchesStmt = $conn->prepare($matchesSql);
-                if (!$matchesStmt) {
-                    error_log("Errore SQL: " . $conn->error);
-                }    
-                $matchesStmt->bind_param("ii", $_SESSION['id'], $_SESSION['id']);
-                $matchesStmt->execute();
-                $matchesResult = $matchesStmt->get_result();
-                $numeroPartite=$matchesResult->num_rows;
-                echo $numeroPartite."</p>";
-                if ($matchesResult->num_rows > 0) {
-                    $percentualeVittorie=$_SESSION['victories']*100/$numeroPartite;
-                    echo "<p>perchentuale di vittorie: ".$percentualeVittorie."%</p>";
-                }    
+        <div id="statistiche">
+            <div>
+                <h3>Statistiche</h3>
+                <p>Vittorie: <?php
+                        if(isset($_SESSION['victories'])){
+                            echo $row['victories'];
+                        } else{
+                            echo '0';
+                        }        
+                        ?></p>
+                <p>Partiegiocate: <?php
+                    $matchesSql = "SELECT * FROM matches WHERE (player1_id = ?  OR player2_id = ?) AND ended=true;";
+                    $matchesStmt = $conn->prepare($matchesSql);
+                    if (!$matchesStmt) {
+                        error_log("Errore SQL: " . $conn->error);
+                    }    
+                    $matchesStmt->bind_param("ii", $_SESSION['id'], $_SESSION['id']);
+                    $matchesStmt->execute();
+                    $matchesResult = $matchesStmt->get_result();
+                    $numeroPartite=$matchesResult->num_rows;
+                    echo $numeroPartite."</p>";
+                    if ($matchesResult->num_rows > 0) {
+                        $percentualeVittorie=$_SESSION['victories']*100/$numeroPartite;
+                        echo "<p>percentuale di vittorie: ".number_format($percentualeVittorie, 2)."%</p>";
+                    }    
+                        ?>        
+            </div>
+            <div>
+                <h3>Classifica globale</h3>
+                <ol>
+                    <?php
+                        $scoreSql="SELECT users.username,users.victories FROM users ORDER BY users.victories DESC LIMIT 3;";
+                        $scoreStmt = $conn->prepare($scoreSql);
+                        if (!$scoreStmt) {
+                            error_log("Errore SQL: " . $conn->error);
+                        }
+                        $scoreStmt->execute();
+                        $scoreResult = $scoreStmt->get_result();
+                        while($row = $scoreResult->fetch_assoc()){
+                            echo "<li>";
+                            echo $row["username"]." ".$row["victories"];
+                            echo "</li>";
+                        }
                     ?>
+                </ol>
+            </div>
         </div>
         <div id="partiteFatte">
             <h3>Partite fatte:</h3>

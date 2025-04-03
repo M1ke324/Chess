@@ -16,7 +16,8 @@ document.addEventListener("DOMContentLoaded",()=>{
     Chessboard.setUpChessboard();
     Chessboard.listaMosse=document.getElementById("listaMosse");
     Chessboard.abbandona=document.getElementById("abbandona");
-    Chessboard.resa=()=>Chessboard.inviaMossa("","","",true);
+    Chessboard.abbandona.disabled=Chessboard.miaSquadra==NERO;
+    Chessboard.resa=()=>{Chessboard.inviaMossa("","","",true)};
     Chessboard.abbandona.addEventListener("click",Chessboard.resa);
 });
 
@@ -73,7 +74,7 @@ class Chessboard{
         Chessboard.abbandona.innerText="ESCI";
         Chessboard.abbandona.style.backgroundColor="#AF1B3F";
         Chessboard.abbandona.disabled=false;
-        Chessboard.abbandona.removeEventListener("click", resa);
+        Chessboard.abbandona.removeEventListener("click", Chessboard.resa);
         Chessboard.abbandona.addEventListener("click",()=>{
             window.location.href="mainBoard.php";
         });
@@ -182,6 +183,7 @@ class Chessboard{
         Chessboard.rimuoviClasse("evidenziata",(casella)=>{if(casella){casella.onclick=null;}})
         Chessboard.rimuoviClasse("avversario",(casella)=>{if(casella){casella.onclick=null;casella.firstChild.onclick=Chessboard.clickPezzo;}})
         Chessboard.rimuoviClasse("pericolo");
+        Chessboard.rimuoviClasse("click");
         if(Chessboard.scaccoFasullo){
             Chessboard.scaccoFasullo=false;
             Chessboard.rimuoviClasse("scacco");
@@ -268,7 +270,7 @@ class Chessboard{
                     casella.classList.add("avversario");
                     if(Chessboard.move){
                         if(squadra==Chessboard.miaSquadra)
-                        casella.classList.add("click");
+                            casella.classList.add("click");
                         casella.firstChild.onclick=Chessboard.mangia;
                     }
                 }
@@ -284,7 +286,8 @@ class Chessboard{
             //Evidenzia il posto come possibile per il movimento
             casella.classList.add("evidenziata");
             if(Chessboard.move){
-                casella.classList.add("click");
+                if(squadra==Chessboard.miaSquadra)
+                    casella.classList.add("click");
                 casella.onclick=Chessboard.sposta;
             }
             return true;
@@ -349,12 +352,22 @@ class Chessboard{
     }
 
     static evidenziaRe(lettera,numero,squadra,funzione,evitaRicorsione=false){
-        if(!evitaRicorsione)
+        let casellaRe;
+        //evita ricorsione è attivata quando evidenziare è chiamata da genera posti pericolosi ed evita che si crei un loop
+        //viene rimossa la classe per fare in modo che quando viene chiamato normalmente per la pressione dell'utente(non nella generazione di posti pericolosi)
+        //i posti pericolosi vengano generati attraversando il re, per evitare che il re si rimetta in un posto pericoloso
+        if(!evitaRicorsione){
+            casellaRe=document.getElementById(lettera+String(numero));
+            casellaRe.classList.remove(squadra);
             Chessboard.generaPostiPericolosi();
+        }
         for(let i=-1;i<=1;i++)
             for(let c=-1;c<=1;c++)
                 if(c!=0||i!=0)
                     funzione(String.fromCharCode(lettera.charCodeAt(0)+i),numero+c,squadra,false,false,true);
+        if(!evitaRicorsione){
+            casellaRe.classList.add(squadra);
+        }
     }
 
     static evidenziaCavallo(lettera,numero,squadra,funzione){

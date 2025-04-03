@@ -25,7 +25,12 @@ h1{
 }
 td{
     padding: 0.5em;
-    width: fit-content;
+    padding-bottom: 0;
+    max-width: fit-content;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
 }
 table{
     width: fit-content;
@@ -40,8 +45,12 @@ input{
     border-radius: 1em;
     border: 2px solid #EA9010;
 }
-input:invalid, #erroriRegistrati,#errori{
+#erroriRegistrati,#errori{
     color: #AF1B3F;
+}
+input:invalid{
+    color: red;
+    border-color: red;
 }
 #regform{
     display: none;
@@ -49,12 +58,13 @@ input:invalid, #erroriRegistrati,#errori{
 button{
     font-family: "Comfortaa", sans-serif;
     height: 2em;
+    padding: 0.5em 1em; 
     border-radius: 1em;
     border-style: none;
     color: white;
-    width: 100%;
     font-weight: bold;
     font-size: 1em;
+    align-self: center;
     background-color: #EA9010;
     cursor: pointer;
 }
@@ -68,7 +78,8 @@ button{
 p{
     font-weight: normal;
     width: fit-content;
-    max-width: 350px;
+    max-width: 220px;
+    text-align: justify;
 }
 form{
     margin: 1em;

@@ -11,14 +11,24 @@ body{
 }
 main{
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
+    grid-template-columns: 1fr 1fr ;
+    grid-template-rows: auto auto auto;
+    height: 85vh;
 }
 #partiteFatte{
     grid-row-start: 1;
     grid-row-end: 3;
     grid-column-start: 2;
     grid-column-end: 3;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+#partitefatte>ul{
+    word-wrap: break-word; 
+    flex-grow: 1;
+    max-height: 100%;
+    overflow-y: auto;
 }
 main>div{
     background-color: white;
@@ -26,11 +36,16 @@ main>div{
     padding-top: 1.5em;
     border-radius: 2em;
     margin:3em;
+    margin-bottom: 0;
 }
 #benvenuto>h1{
     margin: 0;
 }
 #benvenuto{
+    grid-row-start: 1;
+    grid-row-end: 2;
+    grid-column-start: 1;
+    grid-column-end: 2;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -54,7 +69,6 @@ button{
     border-radius: 2em;
     border-style: none;
     color: white;
-    width: 100%;
     font-size: 1.5em;
     background-color: #EA9010;
     cursor: pointer;
@@ -68,9 +82,26 @@ button{
     justify-content: center;
     align-items: center;
     padding:0;
-    margin: 1.5em;
+    margin:0;
 }
 #gioca{
     font-size: 2.5em;
     border-radius: 3em;
+}
+#statistiche{
+    box-sizing: border-box;
+    padding: 4em;
+    grid-row-start: 2;
+    grid-row-end: 3;
+    grid-column-start: 1;
+    grid-column-end: 2;
+    display: flex;
+    justify-content: space-around;
+}
+#statistiche>div{
+    display: table-column;
+    font-size: 1.3em;
+}
+#statistiche>div li{
+    margin: 1em;
 }

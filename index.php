@@ -44,7 +44,7 @@
                 $response['message'] = 'Password richiesta';
                 fine($response);
             }
-            $regExp="/^[A-Z][a-z 0-9]{4,}$/";
+            $regExp="/^[A-Z][A-Z a-z 0-9]{4,}$/";
             if(!preg_match($regExp, $username)){
                 $response['message']='Formato Username non valido';
                 fine($response);
@@ -149,7 +149,7 @@
                     <label for="username">Username</label>
                 </td>
                 <td>
-                    <input type="text" name="username" id="username" placeholder="Username" pattern="^[A-Z][a-z 0-9]{4,}$" required>
+                    <input type="text" name="username" id="username" placeholder="Username" pattern="^[A-Z][A-Z a-z 0-9]{4,}$" required>
                 </td>
             </tr>
             <tr>
@@ -157,7 +157,7 @@
                     <label for="password">Password</label>
                 </td>
                 <td>
-                    <input type="password" name="password" id="password" placeholder="Password" pattern="^[A-Z][a-z 0-9]{4,}$" required>
+                    <input type="password" name="password" id="password" placeholder="Password" pattern="^[A-Z][A-Z a-z 0-9]{4,}$" required>
                 </td>
             </tr>
             <tr>
@@ -178,7 +178,7 @@
                     <label for="usernameReg">Username</label>
                 </td>
                 <td>
-                    <input type="text" name="username" id="usernameReg" placeholder="Username" pattern="^[A-Z][a-z 0-9]{4,}$" required>
+                    <input type="text" name="username" id="usernameReg" placeholder="Username" pattern="^[A-Z][A-Z a-z 0-9]{4,}$" required>
                 </td>
             </tr>
             <tr>
@@ -194,7 +194,7 @@
                     <label for="passwordReg">Password</label>
                 </td>
                 <td>
-                    <input type="password" name="password" id="passwordReg" placeholder="Password" pattern="^[A-Z][a-z 0-9]{4,}$" required>
+                    <input type="password" name="password" id="passwordReg" placeholder="Password" pattern="^[A-Z][A-Z a-z 0-9]{4,}$" required>
                 </td>
             </tr>
             <tr>
@@ -202,11 +202,11 @@
                     <label for="confermaPasswordReg">Conferma password</label>
                 </td>
                 <td>
-                    <input type="password" name="confermaPassword" id="confermaPasswordReg" placeholder="Confema la password" pattern="^[A-Z][a-z 0-9]{4,}$" required>
+                    <input type="password" name="confermaPassword" id="confermaPasswordReg" placeholder="Confema la password" pattern="^[A-Z][A-Z a-z 0-9]{4,}$" required>
                 </td>
             </tr>
             <tr>
-                <td colspan="2" id="messaggio"><p>Username e Password devono iniziare con una lettera maiuscola e contenere almeno 5 caratteri</p></td>
+                <td colspan="2" id="messaggio"><p>Username e Password devono iniziare con una lettera maiuscola e contenere almeno 5 caratteri non speciali.</p></td>
             </tr>
             <tr>
                 <td colspan="2" id="erroriRegistrati"></td>

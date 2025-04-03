@@ -12,6 +12,8 @@ body{
 main{
     display: grid;
     grid-template-columns: 1fr 1fr;
+    grid-template-rows: 16vh auto auto;
+    height: 75vh;
 }
 main>div{
     display: flex;
@@ -21,7 +23,6 @@ main>div{
     box-sizing: border-box;
     height: max-content;
     margin: 2.5%;
-    margin-bottom: 0;
     border-radius: 3em;
     background-color: white;
 }
@@ -31,17 +32,20 @@ p{
 #tavola{
     grid-column-start: 1;
     grid-column-end: 2;
+    grid-row-start: 1;
+    grid-row-end: 3;
     padding:2em;
     width: fit-content;
-    margin: 3% 18%;
+    margin: 3% 15%;
 }
 #mosse{
-    grid-row-start: 1;
+    grid-row-start: 2;
     grid-row-end: 3;
     grid-column-start: 2;
     grid-column-end: 3;
-    height: 93%;
-    width: 70%;
+    height: 91%;
+    width: 85%;
+    overflow:hidden;
 }
 #mosse>ol{
     height: 90%;
@@ -54,8 +58,16 @@ p{
     margin-top: 0.5em;
 }
 #datiAvversario{
+    grid-row-start: 1;
+    grid-row-end: 2;
+    grid-column-start: 2;
+    grid-column-end: 3;
     padding: 2%;
-    width: 90%;
+    width: 85%;
+}
+#datiAvversario>p{
+    font-family: "Comfortaa", sans-serif;
+    font-size: 1.5em;
 }
 button{
     padding: 0.5em 1em;
