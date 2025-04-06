@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <link rel="icon" type="image/png" href="img/favicon.png" sizes="32x32">
+    <meta charset="UTF-8">
+    <title>Documentazione</title>
+</head>
+<body>
+    <header>
+
+        Michele Castrucci<br>
+        Matricola: 636159<br>
+        Esame di Progettazione Web 10/04/2025
+        <h1>PAWN</h1>
+        <p>Pawn è un sito web che permette di giocare a scacchi contro altri utenti reali in un ambiente guidato, di tenere sott'occhio le proprie statistiche e la cronologia delle proprie partite.</p>
+    </header>
+    <main>
+        <article>
+            <h2>Funzionalità</h2>
+            Il sito integra nel gioco le seguenti Funzionalità:
+            <ul>
+                <li>
+                    <h3>Guida alle mosse</h3>
+                    Al click di un pezzo vengono mostrate con il colore verde tutte le possibili mosse che il pezzo può fare, invece vengono colorate di rosso le caselle in cui è possibile mangiare un pezzo avversario. 
+                    La visualizzazione delle mosse è sempre disponibile per tutti i pezzi; ma il movimento di questi ultimi è possibile solo per quelli appartenenti alla propria squadra e solo nel proprio turno. La possibilità di muovere un pezzo viene comunicata all'utente attraverso la modifica dell'aspetto del cursore del mouse, che viene mostrato come puntatore.
+                </li>
+                <li>
+                    <h3>Riconoscimento dello scacco</h3>
+                    Dopo ogni turno vengono generate tutte le possibili mosse del pezzo appena spostato, se nella generazione si incontra una casella contenente il re viene segnalato lo scacco.
+                </li>
+                <li>
+                    <h3>Restrizioni in fase di scacco</h3>
+                    Nel caso in cui il giocatore avversario ci faccia scacco, le nostre mosse saranno limitate alle sole caselle (colorate di blu) che permettono o di mangiare il pezzo attaccante o di interporre un pezzo tra il re e il pezzo attaccante (ad esclusione dei casi in cui quest'ultimo è un pedone o un cavallo).
+                </li>
+                <li>
+                    <h3>Scacco matto</h3>
+                    Il sito permette il riconoscimento automatico dello scacco matto e la successiva terminazione della partita con l'assegnazione del punto al vincitore.<br>
+                    Il rilevamento dello scacco matto avviene in questo modo:
+                    <ol>
+                        <li>
+                            Il giocatore effettua uno scacco all'avvversario
+                        </li>
+                        <li>
+                            Si generano le caselle di scacco (in cui è possibile o mangiare il pezzo che fa scacco, o difendere il re)
+                        </li>
+                        <li>
+                            Vengono generate tutte le possibili mosse dell'avversario (a parte quelle del re), se esse si sovrappongono alle caselle di scacco, allora vuol dire che un pezzo può salvare il re. Perciò non è uno scacco matto. Altrimenti ...
+                        </li>
+                        <li>
+                            Vengono generate tutte le mosse del giocatore 
+                        </li>
+                        <li>
+                            Si controllano le caselle adiacenti al re. Se si trovano solamente caselle contenenti pezzi propri o caselle segnalate come pericolose, allora si segnala lo scacco matto!
+                        </li>
+                    </ol>
+                </li>
+                <li>
+                    <h3>Controllo autoscacco</h3>
+                    Se è il proprio turno e si seleziona un proprio pezzo, prima di evidenziare le possibili mossse il pezzo viene rimosso, vengono generate tutte le mosse dell'avversario. Se queste mosse rivelano uno scacco allora vengono generate le "caselle di scaccco", che permettono di muovere il pezzo solo nei punti in cui non ci si espone ad uno scacco.
+                </li>
+                <li>
+                    <h3>Abbandono</h3>
+                    È permesso abbandonare il gioco durante il proprio turno. È possibile capire se l'abbandono è consentito dalla saturazione dei colori del rispettivo pulsante.
+
+                </li>
+                <li>
+                    <h3>Ultima mossa</h3>
+                    La casella di arrivo dell'ultimo pezzo mosso dall'avversario verrà colorata di arancione per 3 secondi in modo da evidenziare la mossa effettuata.
+                </li>
+                <li>
+                    <h3>Notazione scacchista</h3>
+                    La notazione con cui sono segnate le mosse di scacchi è una modifica minimale della notazione scacchista effettivamente utilizzata: la notazione algebrica. Le modifiche effettuate sono servite a togliere le ambiguita. Ad esempio un cavallo che si muove da g1 a f3, invece di essere segnato come <i>Cf3</i> viene scritto come <i>g1 Cavallo f3</i>. È importante sottolineare che la notazione algebrica stessa prevede la scrittura della casella di partenza nel caso di ambiguità, regola che ho esteso a tutte le casistiche.<br>
+                    Come prevede la notazione originale una mossa che provoca uno scacco viene aggiuntao un '+' e nel caso di uno scacco matto un '#' alla fine. La resa non prevista dalla notazione algebrica viene scritta semplicemente come 'Resa'.
+                </li>
+            </ul>
+        </article>
+        <article>
+            <h2>Guida del sito</h2>
+            Le pagine disponibili sono 3:
+            <ul>
+                <li>
+                    <h3>Login</h3>
+                    È la pagina iniziale in cui è possibile loggarsi o registrarsi al sito attraverso gli appositi form, una volta fatto l'accesso si verrà reindirizzati alla home.
+                </li>
+                <li>
+                    <h3>Home</h3>
+                    In questa pagina è possibile vedere le proprie statistiche e la cronologia delle partite effettuate. Premendo <i>Gioca</i> è possibile inziare il matchmaking di una partita che terminerà automaticamente, con l'inizio effettivo della partita, appena ci sarà un utente disponibile. 
+                </li>
+                <li>
+                    <h3>Gioco</h3>
+                    In questa pagina si ha il gioco vero e proprio. In aggiunta è possibile vedere i dati dell'avversario come lo username e il numero di vittorie dell'avversario. Nella parte destra della pagina si ha l'elenco di tutte le mosse effettuate nella partita. L'unico modo per uscire da questa pagina è attraverso uno scacco matto o un abbandono, in questi casi il pulsante <i>Abbandona</i> viene trasformato in <i>Esci</i>.
+                </li>
+            </ul>
+        </article>
+        <article>
+            <h2>Come testarlo</h2>
+            Per provare a giocare una partita da soli bisogna loggarsi con due account diversi e su due browser diversi, per evitare che il secondo login sovrascriva la sessione del primo.<br>
+            Le credeziali già disponibili per provarlo sono: <br>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Password</th>
+                    </tr>
+                </thead>
+                <tr>
+                    <td>
+                        Utente
+                    </td>
+                    <td>
+                        Prova
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Utente2
+                    </td>
+                    <td>
+                        Prova
+                    </td>
+                </tr>
+            </table>
+            Ovviamente è sempre possibile iscriversi tramite l'apposito form. Una volta loggati è possibile iniziare una partita premendo gioca su entrambi i browser.
+        </article>
+        <article>
+            <h2>
+                Struttura dei file
+            </h2>
+            <pre>
+castrucci_636159
+    ├── config.php
+    ├── css
+    │   ├── chessboard.css
+    │   ├── login.css
+    │   ├── mainBoard.css
+    │   ├── match.css
+    │   └── navbar.css
+    ├── documentazione.html
+    ├── img
+    │   ├── board.png
+    │   ├── favicon.png
+    │   ├── loginBG.jpg
+    │   └── pezzi
+    │       ├── alfiereB.png
+    │       ├── alfiereN.png
+    │       ├── cavalloB.png
+    │       ├── cavalloN.png
+    │       ├── pedoneB.png
+    │       ├── pedoneN.png
+    │       ├── reB.png
+    │       ├── reginaB.png
+    │       ├── reginaN.png
+    │       ├── reN.png
+    │       ├── torreB.png
+    │       └── torreN.png
+    ├── index.php
+    ├── js
+    │   ├── chessboard.js
+    │   ├── login.js
+    │   └── mainBoard.js
+    ├── login.php
+    ├── matchmaking.php
+    ├── match.php
+    ├── navbar.php
+    └── sql
+        └── castrucci_636159.sql
+            </pre>
+        </article>
+    </main>
+    <footer>
+        Crediti:<br>
+        icone: Flaticon.com <br>
+        Fotografo immagine di login: Hassan Pasha
+    </footer>
+</body>
+</html>

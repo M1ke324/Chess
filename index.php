@@ -1,222 +1,128 @@
-    <?php
-        session_start();
-        //Se si è già loggati funziona da logout
-        if(isset($_SESSION['id'])){
-            session_unset();
-            session_destroy();
-        }
-
-        include "config.php";
-        
-        function controlloDatiUtente($dati){
-            $dati = trim($dati);
-            $dati = htmlspecialchars($dati);
-            return $dati;
-        }
-        
-        function controlloEmail($email) {
-            $email = trim($email);
-            return filter_var($email, FILTER_SANITIZE_EMAIL);
-        }
-
-        function fine($response){
-            echo json_encode($response);
+<?php
+    session_start();
+    //Controllo se ha tutte le varibili necessarie per accedere alla pagina altrimenti lo ridirigo al login
+    if(!isset($_SESSION['username'])||
+        !isset($_SESSION['id'])||
+        !isset($_SESSION['email'])){
+            header("Location: login.php");
             exit();
-        }
-
-        if (isset($_POST['username']) && isset($_POST['password'])) {
-            header('Content-Type: application/json');
-
-            $response = [
-                'success' => false,
-                'message' => 'Errore sconosciuto'
-            ];
-            
-            //rimuove gli spazzi e evita attacchi XSS
-            $username = controlloDatiUtente($_POST['username']);
-            $password = controlloDatiUtente($_POST['password']);
-            
-            if (empty($username)) {
-                $response['message'] = 'Username richiesto';
-                fine($response);
-            }
-            if (empty($password)) {
-                $response['message'] = 'Password richiesta';
-                fine($response);
-            }
-            $regExp="/^[A-Z][A-Z a-z 0-9]{4,}$/";
-            if(!preg_match($regExp, $username)){
-                $response['message']='Formato Username non valido';
-                fine($response);
-            }
-
-            if(!preg_match($regExp, $password)){
-                $response['message']='Formato Passwrod non valido';
-                fine($response);
-            }
-            
-            if(isset($_POST['email'])){
-                $email = controlloEmail($_POST['email']);
-                if (empty($username)) {
-                    $response['message'] = 'Username richiesto';
-                    fine($response);
-                }
-
-                $password=password_hash($password,PASSWORD_DEFAULT);
-
-                $stmt = $conn->prepare("INSERT INTO users (username, email, password) VALUES ( ?, ?, ?)");
-                if($stmt){
-                    $stmt->bind_param("sss", $username,$email,$password);
-                    if($stmt->execute()){
-
-                        
-                        $_SESSION['username'] = $username;
-                        $_SESSION['id'] = $conn->insert_id;
-                        $_SESSION['email'] = $email;
-                        
-                        $response['success'] = true;
-                        $response['message'] = 'registrazione effettuata con successo';
-                        $response['redirect'] = 'mainBoard.php';
-                    }else{
-                        //Numero di errore per una violazione di unique 
-                        if ($conn->errno == 1062) {
-                            //Recupera il messaggio di errore
-                            $messaggioErrore = $conn->error;
-                    
-                            //Identifica il campo UNIQUE violato
-                            if (strpos($messaggioErrore, 'email') !== false) {
-                                $response['message'] = "L'email è già in uso.";
-                            } elseif (strpos($messaggioErrore, 'username') !== false) {
-                                $response['message'] = "L'username è già in uso.";
-                            } else {
-                                error_log("Errore di duplicato: " . $error_message);
-                            }
-                        } else {
-                            error_log( "Errore durante l'inserimento: " . $mysqli->error);
-                        }
-                        fine($response);
-                    }
-                }else{
-                    error_log('statement di registrazione non valido');
-                }
-            
-            }else{
-
-                
-                $stmt = $conn->prepare("SELECT * FROM users WHERE username = ?");
-                
-                if ($stmt) {
-                    $stmt->bind_param("s", $username);
-                    $stmt->execute();
-                    $result = $stmt->get_result();
-                    if ($result->num_rows === 1) {
-                        $row = $result->fetch_assoc();
-                        if (password_verify($password,$row['password'])){
-                            $_SESSION['username'] = $row['username'];
-                            $_SESSION['id'] = $row['id'];
-                            $_SESSION['email'] = $row['email'];
-                            
-                            $response['success'] = true;
-                            $response['message'] = 'Login effettuato con successo';
-                            $response['redirect'] = 'mainBoard.php';
-                        }else{
-                            $response['message'] = 'Password non valida';
-                        } 
-                    }else{
-                        $response['message'] = 'Username non valido';
-                    }
-                }else{
-                    error_log('statement non valido');
-                }
-            }
-            fine($response);
-        }
-        ?>  
+    }
+    include "config.php";
+    include "navbar.php";
+?>
+<!DOCTYPE html>
 <html lang="it">
-    <head>
-    <link rel="icon" type="image/png" href="img/favicon.png" sizes="32x32">
-    <link rel="stylesheet" href="css/login.css">
+<head>
     <meta charset="UTF-8">
-    <script src="js/login.js"></script>
-    <title>Login</title>
+    <link rel="icon" type="image/png" href="img/favicon.png" sizes="32x32">
+    <link rel="stylesheet" href="css/mainBoard.css">
+    <link rel="stylesheet" href="css/navbar.css">
+    <script src="js/mainBoard.js"></script>
+    <title>Home</title>
 </head>
 <body>
-    <h1>PAWN</h1>
-    <form action="" method="post" id="form">
-        <table>
-            <tr>
-                <td>
-                    <label for="username">Username</label>
-                </td>
-                <td>
-                    <input type="text" name="username" id="username" placeholder="Username" pattern="^[A-Z][A-Z a-z 0-9]{4,}$" required>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label for="password">Password</label>
-                </td>
-                <td>
-                    <input type="password" name="password" id="password" placeholder="Password" pattern="^[A-Z][A-Z a-z 0-9]{4,}$" required>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="2" id="errori"></td>
-            </tr>
-            <tr>
-                <td colspan="2">
-                    <button type="submit" id="login">Login</button>
-                </td>
-            </tr>
-        </table>
-    </form>
-    <button id="mostraRegistrati">Registrati</button>
-    <form action="" method="post" id="regForm">
-        <table>
-            <tr>
-                <td>
-                    <label for="usernameReg">Username</label>
-                </td>
-                <td>
-                    <input type="text" name="username" id="usernameReg" placeholder="Username" pattern="^[A-Z][A-Z a-z 0-9]{4,}$" required>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label for="emailReg">Email</label>
-                </td>
-                <td>
-                    <input type="email" name="email" id="emailReg" placeholder="email" required>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label for="passwordReg">Password</label>
-                </td>
-                <td>
-                    <input type="password" name="password" id="passwordReg" placeholder="Password" pattern="^[A-Z][A-Z a-z 0-9]{4,}$" required>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label for="confermaPasswordReg">Conferma password</label>
-                </td>
-                <td>
-                    <input type="password" name="confermaPassword" id="confermaPasswordReg" placeholder="Confema la password" pattern="^[A-Z][A-Z a-z 0-9]{4,}$" required>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="2" id="messaggio"><p>Username e Password devono iniziare con una lettera maiuscola e contenere almeno 5 caratteri non speciali.</p></td>
-            </tr>
-            <tr>
-                <td colspan="2" id="erroriRegistrati"></td>
-            </tr>
-            <tr>
-                <td colspan="2">
-                    <button type="submit" id="registrati">Registrati</button>
-                </td>
-            </tr>
-        </table>
-    </form>
+    <?php
+        //Includo la navbar
+        $idButton="esci";
+        $button="ESCI";
+        navbar($idButton,$button);
+    ?>
+    <main>
+        <div id="benvenuto">
+            <h2>Benvenuto <?php 
+            //Cerco l'utente nel DB e stampo il suo nome
+            $victoriesSql = "SELECT * FROM users WHERE id = ? ";
+            $victoriesStmt = $conn->prepare($victoriesSql);
+            if (!$victoriesStmt) {
+                error_log("Errore SQL: " . $conn->error);
+            }    
+            $victoriesStmt->bind_param("i", $_SESSION['id']);
+            $victoriesStmt->execute();
+            $victoriesResult = $victoriesStmt->get_result();
+            $vittorie=false;
+            if ($victoriesResult->num_rows > 0) {
+                $row = $victoriesResult->fetch_assoc();
+                echo $row['username'];
+                $vittorie=$row['victories'];
+            }
+            ?></h2>
+        </div>
+        <div id="statistiche">
+            <div>
+                <h3>Statistiche</h3>
+                <p>Vittorie: <?php
+                        //Stampo le vittore dell'utente
+                        if($vittorie){
+                            echo $row['victories'];
+                        } else{
+                            echo '0';
+                        }        
+                        ?></p>
+                <p>Partiegiocate: <?php
+                    //Cerco il numero di partite a cui l'utente ha partecipato
+                    $matchesSql = "SELECT * FROM matches WHERE (player1_id = ?  OR player2_id = ?) AND ended=true;";
+                    $matchesStmt = $conn->prepare($matchesSql);
+                    if (!$matchesStmt) {
+                        error_log("Errore SQL: " . $conn->error);
+                    }
+                    $matchesStmt->bind_param("ii", $_SESSION['id'], $_SESSION['id']);
+                    $matchesStmt->execute();
+                    $matchesResult = $matchesStmt->get_result();
+                    $numeroPartite=$matchesResult->num_rows;
+                    //Stampo il numero di partite fatte
+                    echo $numeroPartite."</p>";
+                    //Calcolo la percentuale delle vittorie
+                    if ($matchesResult->num_rows > 0) {
+                        $percentualeVittorie=$vittorie*100/$numeroPartite;
+                        echo "<p>percentuale di vittorie: ".number_format($percentualeVittorie, 2)."%</p>";
+                    }    
+                        ?>        
+            </div>
+            <div>
+                <h3>Classifica globale</h3>
+                <ol>
+                    <?php
+                        $scoreSql="SELECT users.username,users.victories FROM users ORDER BY users.victories DESC LIMIT 3;";
+                        $scoreStmt = $conn->prepare($scoreSql);
+                        if (!$scoreStmt) {
+                            error_log("Errore SQL: " . $conn->error);
+                        }
+                        $scoreStmt->execute();
+                        $scoreResult = $scoreStmt->get_result();
+                        while($row = $scoreResult->fetch_assoc()){
+                            echo "<li>";
+                            echo $row["username"]." ".$row["victories"];
+                            echo "</li>";
+                        }
+                    ?>
+                </ol>
+            </div>
+        </div>
+        <div id="partiteFatte">
+            <h3>Partite fatte:</h3>
+            <ul>
+                <?php
+                //Uso i rislutati della query che elenca le partite fatte dal utente anche per elencare effetivamente tutte le partite fatte
+                    if ($matchesResult->num_rows > 0) {
+                        while($row = $matchesResult->fetch_assoc()){
+                            echo "<li>";
+                            echo str_replace(","," ",$row["moves"]);
+                            echo "</li>";
+                        }
+                    }else if($matchesResult->num_rows == 0){
+                        echo "<li>";
+                        echo "È il momento di fare la tua prima partita!!";
+                        echo "</li>";
+                    }
+                    ?>
+            </ul>
+        </div>
+        <div id="matchmaking">
+
+            <p id="errori"></p>
+            <button id="gioca">Gioca</button>
+            <a href="documentazione.html" target="_blank" >Documentazione</a>
+        </div>
+    </main>
 </body>
 </html>

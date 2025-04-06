@@ -13,7 +13,7 @@ main{
     display: grid;
     grid-template-columns: 1fr 1fr ;
     grid-template-rows: auto auto auto;
-    height: 85vh;
+    height: 75vh;
 }
 #partiteFatte{
     grid-row-start: 1;
@@ -24,7 +24,7 @@ main{
     display: flex;
     flex-direction: column;
 }
-#partitefatte>ul{
+#partiteFatte>ul{
     word-wrap: break-word; 
     flex-grow: 1;
     max-height: 100%;
@@ -62,9 +62,8 @@ h2{
 #errori{
     color: white;
 }
-button{
-    padding: 0.5em 1em;
-    max-width: fit-content;
+button,a{
+    padding: 0.3em 1em; 
     font-family: "Comfortaa", sans-serif;
     border-radius: 2em;
     border-style: none;
@@ -74,15 +73,17 @@ button{
     cursor: pointer;
 }
 #matchmaking{
+    position: relative;
     background-color: black;
     grid-column-start: 1;
     grid-column-end: 3;
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding:0;
+    flex-direction: column;
+    padding:0.8em 0;
     margin:0;
+    width: 100%;
 }
 #gioca{
     font-size: 2.5em;
@@ -104,4 +105,18 @@ button{
 }
 #statistiche>div li{
     margin: 1em;
+}
+a{
+    position: absolute;
+    right: 5vh;
+    text-decoration: none;  
+    color: black;
+    background-color: white;
+    padding: 0.3em 1em; 
+    display: flex;
+    align-items: center; 
+}
+
+#esci{
+    padding: 0.5em 1em; 
 }

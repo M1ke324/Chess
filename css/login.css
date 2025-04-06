@@ -26,7 +26,7 @@ h1{
 td{
     padding: 0.5em;
     padding-bottom: 0;
-    max-width: fit-content;
+    max-width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -52,10 +52,10 @@ input:invalid{
     color: red;
     border-color: red;
 }
-#regform{
+#regForm{
     display: none;
 }
-button{
+button,a{
     font-family: "Comfortaa", sans-serif;
     height: 2em;
     padding: 0.5em 1em; 
@@ -64,14 +64,12 @@ button{
     color: white;
     font-weight: bold;
     font-size: 1em;
-    align-self: center;
     background-color: #EA9010;
     cursor: pointer;
 }
 #mostraRegistrati{
     color: #EA9010;
     background-color: white;
-    
     padding: 0% 2%;
     width: fit-content;
 }
@@ -83,4 +81,14 @@ p{
 }
 form{
     margin: 1em;
+}
+a{
+    position: absolute;
+    bottom: 5vh;
+    text-decoration: none;  
+    color: black;
+    background-color: white;
+    padding: 0% 1%; 
+    display: flex;
+    align-items: center; 
 }

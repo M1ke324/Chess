@@ -18,11 +18,12 @@ class Login{
 
     constructor(){
         document.addEventListener("DOMContentLoaded", ()=>{
-            this.init()
+            this.init();
         })
     }
 
     init(){
+        //Assegno agli attributi della classe i rispettivi elementi
         this.username=document.getElementById("username");
         this.password=document.getElementById("password")
         this.button=document.getElementById("login");
@@ -40,13 +41,15 @@ class Login{
         this.registrati=document.getElementById("registrati");
         this.erroriRegistrati=document.getElementById("erroriRegistrati");
 
+        //Assegno agli elementi gli eventListener
         this.form.addEventListener("submit", this.submitLogin.bind(this));
         this.mostraRegistrati.addEventListener("click", this.nuovoForm.bind(this));
         this.regForm.addEventListener("submit", this.submitRegistrati.bind(this));
 
         this.boolReg=true;
     }
-
+    //Rimuovo il form di accesso e mostro quello di registrazione
+    //o l'opposto a seconda di quello che è mostrato a schermo
     nuovoForm(e){
         if(this.boolReg){
             this.form.style.display="none";
@@ -62,18 +65,20 @@ class Login{
     //submit login
     submitLogin(e){
         e.preventDefault();
+        //Controllo che i campi non siano vuoti
         if(this.password.value==""||this.username.value==""){
             this.mostraMessaggio("Tutti i campi devono essere riempiti")
             return;
         }
+        //Controllo che rispettino il formato corretto
         if(this.username.checkValidity()&&this.password.checkValidity()){
             this.button.disabled = true;
-            
+            //Creo il form da inviare
             const form = new FormData();
             form.append('username', this.username.value);
             form.append('password', this.password.value);
             
-            fetch('index.php', {
+            fetch('login.php', {
                 method: 'POST',
                 body: form,
                 credentials: 'same-origin'
@@ -81,18 +86,20 @@ class Login{
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    //Se il serverr lo permette faccio il redirect 
                     window.location.href = data.redirect;
                 } else {
+                    //Mostro l'errore indicato dal server
                     this.mostraMessaggio(data.message);
                     this.button.disabled = false;
                 }
             })
             .catch(error => {
-                console.error('Errore:', error);
+                //Se c'è un erroe nella connessione sblocco il pulsante per permette all'utente
+                //di ritentare una richiesta più avanti
+                this.mostraMessaggio("errore di connessione");
                 this.button.disabled = false;
             });
-        }else{
-            console.log("Dati non validi")
         }
     }
 
@@ -106,7 +113,7 @@ class Login{
 
     submitRegistrati(e){
         e.preventDefault();
-
+        //Controllo che i campi non siano vuoti
         if(this.usernameReg.value===""||
            this.passwordReg.value===""||
            this.emailReg.value===""||
@@ -114,11 +121,12 @@ class Login{
             this.mostraMessaggioRegistrati("Tutti i campi devono essere riempiti");
             return;
         }
+        //Controllo che le password siano uguali 
         if(this.passwordReg.value!=this.confermaPasswordReg.value){
             this.mostraMessaggioRegistrati("Le password devono coincidere");
             return;
         }
-
+        //Controllo che rispettino il formato corretto
         if(this.usernameReg.checkValidity()&&
             this.emailReg.checkValidity()&&
             this.passwordReg.checkValidity()&&
@@ -126,12 +134,13 @@ class Login{
             
             this.registrati.disabled = true;
             
+            //Creo il form da inviare
             const form = new FormData();
             form.append('username', this.usernameReg.value);
             form.append('email',this.emailReg.value);
             form.append('password', this.passwordReg.value);
             
-            fetch('index.php', {
+            fetch('login.php', {
                 method: 'POST',
                 body: form,
                 credentials: 'same-origin'
@@ -139,18 +148,20 @@ class Login{
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    //Se il serverr lo permette faccio il redirect 
                     window.location.href = data.redirect;
                 } else {
+                    //Mostro l'errore indicato dal server
                     this.mostraMessaggioRegistrati(data.message);
                     this.registrati.disabled = false;
                 }
             })
             .catch(error => {
-                console.error('Errore:', error);
+                //Se c'è un erroe nella connessione sblocco il pulsante per permette all'utente
+                //di ritentare una richiesta più avanti
+                this.mostraMessaggio("errore di connessione");
                 this.registrati.disabled = false;
             });
-        }else{
-            console.log("Dati non validi")
         }
     }
     

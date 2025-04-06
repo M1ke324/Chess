@@ -4,20 +4,23 @@
     if(!isset($_SESSION['username'])||
         !isset($_SESSION['id'])||
         !isset($_SESSION['email'])){
-            header("Location: index.php");
+            header("Location: login.php");
             exit();
     }
     include "config.php";
 
+    //Ferma l'esecuzione e manda il parametro al client in JSON
     function fine($response){
         echo json_encode($response);
         exit();
     }
 
+    //Ferma l'esecuzione in caso si sia trovata una partita
+    //Invia response con success=true
+    //aggiunge a response gli altri parametri
+    //Redirige l'utente a match.php
     function success($response,$bianco,$opponent,$game){
         $response['success']=true;
-        $response['game']=$game;
-        $response['piece']=$bianco;
         $response['redirect']="match.php";
         $_SESSION['piece']=$bianco;
         $_SESSION['game']=$game;
@@ -45,20 +48,20 @@
                 }
                 success($response,true,$row['player2_id'],$row['match_id']);
             }
-            //altrimenti avverto che non è arrivato ancora nessuno e bisogna attendere
+            //altrimenti avverto che non è arrivato ancora nessuno e bisogna attendere (saltare l'if)
             return false;
         }else{
             //Non ci sono righe in waiting create da me quindi bisogna cercare un giocatore o crearne un'altra ($_session["game"] era vecchio)
+            //Bisogna entrare nell'if
             return true;
         }
     }
 
     $response = [
-        'success' => false,
-        'game' => 0,
-        'piece' => false //true-> white false->black
+        'success' => false
     ];
     $count=0;
+    //Mi inserisco in ciclo di controllo
     do{
         //Se game non è settato (e quindi accedo per la prima volta) cerco/creao una nuova, altrimenti guardo gameEnded()
         if(!isset($_SESSION['game'])||gameWaiting()){
@@ -79,7 +82,7 @@
                 }
                 success($response,false,$row['player1_id'],$row['match_id']);
             } else {
-                //Se non c'è nessun giocatore pronto a giocare all'ora mi metto in attesa di un giocatore
+                //Se non c'è nessun giocatore pronto a giocare allora mi metto in attesa di un giocatore
                 $insertMatchSql = "INSERT INTO matches (player1_id) VALUES (?)";
                 $insertMatchStmt = $conn->prepare($insertMatchSql);
                 $insertMatchStmt->bind_param("i", $_SESSION['id']);
@@ -102,9 +105,10 @@
                 }
             }
         }
+        //dorme per 2 secondi e ricontrolla
         sleep(2);
+        //non controlla per più di 30 volte (1 minuto) dopo di che in caso di fallimento risponde all'utente con success=false
+        //Per fare in modo che se il client si disconnette non ci siano loop infiniti nel server
     }while($count++<30);
     fine($response);
-    
-    //CHIUDERE LE CONNESSIONI?
 ?>
