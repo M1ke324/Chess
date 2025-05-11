@@ -61,10 +61,10 @@ To try playing a game alone, you need to log in with two different accounts and 
 
 The credentials already available to try it are:
 
-| Username | Password |
-|──────────|──────────|
-| Utente   | Prova    |
-| Utente2  | Prova    |
+| Username | Password | \
+|──────────|──────────| \
+| Utente   | Prova    | \
+| Utente2  | Prova    | \
 
 Of course, it is always possible to register through the appropriate form. Once logged in, you can start a game by pressing play on both browsers.
 
