@@ -1,3 +1,4 @@
+![Icon](../img/pezzi/pedoneB.png) ![Icon](../img/pezzi/torreB.png)  ![Icon](../img/pezzi/cavalloB.png) ![Icon](../img/pezzi/alfiereB.png) ![Icon](../img/pezzi/reginaB.png) ![Icon](../img/pezzi/reB.png) ![Icon](../img/pezzi/reginaB.png) ![Icon](../img/pezzi/alfiereB.png) ![Icon](../img/pezzi/cavalloB.png) ![Icon](../img/pezzi/torreB.png) ![Icon](../img/pezzi/pedoneB.png)
 # PAWN
 Pawn è un sito web che permette di giocare a scacchi contro altri utenti reali in un ambiente guidato, di tenere sott'occhio le proprie statistiche e la cronologia delle proprie partite.
 
