@@ -115,5 +115,5 @@ castrucci_636159
 
 **Credits:**  
 Icons: Flaticon.com  
-Login image photographer: Hassan Pasha
+Login image photographer: Hassan Pasha \
 *This README has been translated from Italian to English by an AI translator.*
