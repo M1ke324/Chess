@@ -1,3 +1,4 @@
+![Icon](img/pezzi/pedoneB.png) ![Icon](img/pezzi/torreB.png)  ![Icon](img/pezzi/cavalloB.png) ![Icon](img/pezzi/alfiereB.png) ![Icon](img/pezzi/reginaB.png) ![Icon](img/pezzi/reB.png) ![Icon](img/pezzi/reginaB.png) ![Icon](img/pezzi/alfiereB.png) ![Icon](img/pezzi/cavalloB.png) ![Icon](img/pezzi/torreB.png) ![Icon](img/pezzi/pedoneB.png)
 # PAWN
 
 Original text in 🇮🇹 [Italiano](docs/README.it.md)
@@ -60,12 +61,12 @@ On this page, you have the actual game. Additionally, you can see the opponent's
 To try playing a game alone, you need to log in with two different accounts and on two different browsers, to prevent the second login from overwriting the session of the first.
 
 The credentials already available to try it are:
-
-| Username | Password | \
-|──────────|──────────| \
-| Utente   | Prova    | \
-| Utente2  | Prova    | \
-
+```
+| Username | Password |
+|----------|----------|
+| Utente   | Prova    |
+| Utente2  | Prova    |
+```
 Of course, it is always possible to register through the appropriate form. Once logged in, you can start a game by pressing play on both browsers.
 
 ## File Structure
@@ -115,7 +116,4 @@ castrucci_636159
 **Credits:**  
 Icons: Flaticon.com  
 Login image photographer: Hassan Pasha
-
----
-
 *This README has been translated from Italian to English by an AI translator.*
